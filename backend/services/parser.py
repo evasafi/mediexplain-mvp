@@ -1,68 +1,24 @@
-﻿import re
+from pypdf import PdfReader
 
-def extract_lab_metrics(text: str) -> list[dict]:
-    """
-    Parses raw text from a medical report to extract lab test names, 
-    values, units, and reference ranges using flexible pattern matching.
-    """
-    metrics = []
+def parse_pdf_text(file_path: str):
+    reader = PdfReader(file_path)
+    full_text = ""
+    for page in reader.pages:
+        text = page.extract_text()
+        if text:
+            full_text += text + "\n"
     
-    # Common pattern for lab lines: Test Name   Value   Unit   (Reference Range)
-    # Example: Glucose    99    mg/dL    (70 - 99)
-    # This regex looks for a test name, a numeric value with optional decimals, a unit, and an optional range.
-    lines = text.split("\n")
-    
-    # Flexible regex pattern for lab lines
-    # Group 1: Test Name, Group 2: Value, Group 3: Unit, Group 4: Reference Range (optional)
-    pattern = re.compile(r"^([A-Za-z\s\-\/\(\)]+?)\s+([0-9]+\.?[0-9]*)\s+([a-zA-Z%\/\._]+)(?:\s+([\(\[\{]?\d+[\d\.\-\s\%\<\>]+[\)\]\}]?))?", re.IGNORECASE)
-
-    for line in lines:
+    # Filter and extract concise key-value metric lines
+    metrics = {}
+    for line in full_text.splitlines():
         line = line.strip()
-        if not line:
-            continue
+        if ":" in line:
+            parts = line.split(":", 1)
+            key = parts[0].strip()
+            val = parts[1].strip()
             
-        match = pattern.search(line)
-        if match:
-            test_name = match.group(1).strip()
-            test_value = match.group(2).strip()
-            unit = match.group(3).strip()
-            ref_range = match.group(4).strip() if match.group(4) else "N/A"
-            
-            # Simple heuristic status check (can be expanded)
-            status = "Normal" 
-            
-            metrics.append({
-                "test_name": test_name,
-                "test_value": test_value,
-                "unit": unit,
-                "reference_range": ref_range,
-                "status": status
-            })
-            
-    # Fallback / Generic extraction if strict regex lines don't match standard multi-column formats
-    if not metrics:
-        # Fallback: look for lines containing numbers and common units
-        unit_keywords = ["mg/dl", "g/dl", "mmol/l", "u/l", "g/l", "%", "fl", "pg", "cells/ul"]
-        for line in lines:
-            lower_line = line.lower()
-            if any(u in lower_line for u in unit_keywords):
-                parts = line.split()
-                if len(parts) >= 2:
-                    # Try to find a numeric part
-                    for i, part in enumerate(parts):
-                        if re.match(r"^\d+\.?\d*$", part):
-                            test_name = " ".join(parts[:i])
-                            test_value = part
-                            unit = parts[i+1] if i+1 < len(parts) else "N/A"
-                            ref_range = " ".join(parts[i+2:]) if i+2 < len(parts) else "N/A"
-                            if len(test_name) > 1:
-                                metrics.append({
-                                    "test_name": test_name,
-                                    "test_value": test_value,
-                                    "unit": unit,
-                                    "reference_range": ref_range,
-                                    "status": "Normal"
-                                })
-                            break
-
-    return metrics
+            # Keep keys and values concise to exclude long paragraphs or prose
+            if len(key) < 40 and len(val) < 60 and not key.lower().startswith(("case", "date", "note", "summary")):
+                metrics[key] = val
+                
+    return metrics, full_text
