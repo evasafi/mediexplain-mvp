@@ -1,47 +1,53 @@
--- =========================================================================
--- MediExplain Database Schema (PostgreSQL)
--- =========================================================================
+import logging
+import os
+import uuid
 
--- Enable UUID extension if not already enabled
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+from fastapi import APIRouter, File, HTTPException, UploadFile
 
--- 1. Users Table
-CREATE TABLE users (
-    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+from backend.services.explainer import generate_explanation
+from backend.services.parser import parse_pdf_text
 
--- 2. Documents Table (Uploaded Files)
-CREATE TABLE lab_documents (
-    document_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
-    file_path TEXT NOT NULL,
-    file_type VARCHAR(20) NOT NULL, -- 'pdf', 'png', 'jpg'
-    raw_ocr_text TEXT,
-    upload_status VARCHAR(50) DEFAULT 'processed', -- 'pending', 'processed', 'failed'
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+logger = logging.getLogger(__name__)
+router = APIRouter()
 
--- 3. Extracted Metrics Table (Parsed Key-Value Pairs)
-CREATE TABLE lab_metrics (
-    metric_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_id UUID REFERENCES lab_documents(document_id) ON DELETE CASCADE,
-    marker_name VARCHAR(100) NOT NULL,  -- e.g., "Hemoglobin", "WBC"
-    measured_value NUMERIC(10, 2) NOT NULL,
-    reference_range_min NUMERIC(10, 2),
-    reference_range_max NUMERIC(10, 2),
-    unit VARCHAR(30),                    -- e.g., "g/dL", "10^3/uL"
-    status_flag VARCHAR(20)              -- 'NORMAL', 'HIGH', 'LOW', 'CRITICAL'
-);
+UPLOAD_DIR = "uploads"
+MAX_BYTES = 10 * 1024 * 1024  # 10 MB
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
--- 4. Explanations & Summaries Table
-CREATE TABLE explanation_reports (
-    report_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_id UUID REFERENCES lab_documents(document_id) ON DELETE CASCADE,
-    plain_text_summary TEXT NOT NULL,
-    generated_questions JSONB,          -- List of questions for the doctor
-    disclaimer_accepted BOOLEAN DEFAULT TRUE,
-    model_version VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+
+@router.post("/upload", summary="Upload, Parse, and Explain Medical Report")
+def upload_and_parse_report(file: UploadFile = File(...)):
+    data = file.file.read(MAX_BYTES + 1)
+    if len(data) > MAX_BYTES:
+        raise HTTPException(status_code=413, detail="File too large (10 MB max).")
+    if not data.startswith(b"%PDF"):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
+
+    file_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}.pdf")
+    try:
+        with open(file_path, "wb") as buffer:
+            buffer.write(data)
+
+        metrics, full_text = parse_pdf_text(file_path)
+        if not full_text or not full_text.strip():
+            raise HTTPException(
+                status_code=422,
+                detail="No readable text found. Scanned PDFs are not supported yet.",
+            )
+        explanation = generate_explanation(metrics, full_text)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Report processing failed")
+        raise HTTPException(status_code=500, detail="Could not process this report.")
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    return {
+        "status": "success",
+        "metrics_extracted_count": len(metrics),
+        "metrics": metrics,
+        "explanation_summary": explanation["summary"],
+        "recommendations": explanation["recommendations"],
+    }
