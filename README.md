@@ -1,4 +1,4 @@
-# MediExplain MVP 🩺
+# MediExplain MVP 
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3.14+-3776AB?style=flat-square&logo=python)](https://www.python.org/)
@@ -9,17 +9,17 @@
 
 ---
 
-## 📋 Features
+##  Features
 
-- 📄 **PDF Report Parsing**: Extracts raw text content from uploaded medical documents using `pypdf`.
-- 📊 **Diagnostic Metric Extraction**: Identifies key biomarkers, reference ranges, and test values.
-- 💡 **Plain-Language Explanations**: Generates clear, non-alarmist health summaries and care recommendations.
-- 📜 **User Audit History**: Tracks past document uploads, parsed metrics, and report explanations per user profile.
-- 🔒 **Security & Credentials**: Strict environment isolation via `.env` with complete decoupling from version control.
+-  **PDF Report Parsing**: Extracts raw text content from uploaded medical documents using `pypdf`.
+-  **Diagnostic Metric Extraction**: Identifies key biomarkers, reference ranges, and test values.
+-  **Plain-Language Explanations**: Generates clear, non-alarmist health summaries and care recommendations.
+-  **User Audit History**: Tracks past document uploads, parsed metrics, and report explanations per user profile.
+-  **Security & Credentials**: Strict environment isolation via `.env` with complete decoupling from version control.
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+##  Architecture & Tech Stack
 
 - **Framework:** FastAPI (Python 3.14)
 - **Database:** PostgreSQL (via `psycopg` v3 driver)
@@ -47,7 +47,7 @@ mediexplain-mvp/
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -91,7 +91,7 @@ mediexplain-mvp/
 
 ---
 
-## 📡 API Endpoints Summary
+##  API Endpoints Summary
 
 | Method | Route | Description |
 | :--- | :--- | :--- |
@@ -104,6 +104,6 @@ Interactive API documentation and schema testing are available at `http://127.0.
 
 ---
 
-## 🛡️ License
+##  License
 
 Distributed under the MIT License. See `LICENSE` for more information.
