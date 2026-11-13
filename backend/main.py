@@ -1,5 +1,15 @@
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
 from backend.routers import reports
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger("backend")
 
 app = FastAPI(
     title="MediExplain MVP Backend",
@@ -8,6 +18,19 @@ app = FastAPI(
 )
 
 app.include_router(reports.router, prefix="/reports", tags=["Reports"])
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    # Last-resort handler: anything not caught by a route still gets its real
+    # type and traceback in the server log, while the client sees a generic 500.
+    logger.error(
+        "Unhandled %s on %s %s",
+        type(exc).__name__, request.method, request.url.path,
+        exc_info=exc,
+    )
+    return JSONResponse(status_code=500, content={"detail": "Internal server error."})
+
 
 @app.get("/health", tags=["Health"])
 def health_check():

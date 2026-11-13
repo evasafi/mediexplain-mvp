@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 MODELS = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
 MAX_CHARS = 30000
 RETRIES = 2  # per model
+# Per-call deadline. Without it a stalled Gemini call hangs the request forever.
+# Gemini enforces it server-side and answers 504 DEADLINE_EXCEEDED (a ServerError),
+# which the retry/fallback loop already handles.
+TIMEOUT_MS = 60_000
 
 DISCLAIMER = (
     "This explanation is for education only and is not medical advice, a diagnosis, "
@@ -67,7 +71,10 @@ _client = None
 def _get_client():
     global _client
     if _client is None:
-        _client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        _client = genai.Client(
+            api_key=os.environ["GEMINI_API_KEY"],
+            http_options=types.HttpOptions(timeout=TIMEOUT_MS),
+        )
     return _client
 
 
@@ -91,13 +98,23 @@ def _call_model(text: str) -> ReportExplanation:
                 return ReportExplanation.model_validate_json(response.text)
             except errors.ServerError as e:
                 last_error = e
-                logger.warning("%s unavailable (attempt %d/%d)", model, attempt + 1, RETRIES)
+                logger.warning(
+                    "%s unavailable: %s %s (attempt %d/%d)",
+                    model, e.code, e.status, attempt + 1, RETRIES,
+                )
                 time.sleep(2 ** attempt)
+            except errors.ClientError as e:
+                if e.code != 404:
+                    raise
+                # Model retired or not available to this key: skip it, don't retry.
+                logger.warning("%s not found (404), skipping to next model", model)
+                break
+    if last_error is None:
+        raise RuntimeError("No configured Gemini model is available (all returned 404).")
     raise last_error
 
 
-def generate_explanation(metrics, full_text):
-    # `metrics` is kept so the router does not need to change yet.
+def generate_explanation(full_text):
     text = full_text[:MAX_CHARS]
     result = _call_model(text)
 

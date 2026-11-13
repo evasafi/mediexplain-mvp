@@ -29,23 +29,27 @@ def upload_and_parse_report(file: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             buffer.write(data)
 
-        metrics, full_text = parse_pdf_text(file_path)
+        full_text = parse_pdf_text(file_path)
         if not full_text or not full_text.strip():
             raise HTTPException(
                 status_code=422,
                 detail="No readable text found. Scanned PDFs are not supported yet.",
             )
-        result = generate_explanation(metrics, full_text)
+        result = generate_explanation(full_text)
     except HTTPException:
         raise
-    except genai_errors.ServerError:
-        logger.exception("Model unavailable after retries")
+    except genai_errors.ServerError as e:
+        logger.exception("Model unavailable after retries: %s", type(e).__name__)
         raise HTTPException(
             status_code=503,
             detail="The explanation service is busy. Please try again in a minute.",
         )
-    except Exception:
-        logger.exception("Report processing failed")
+    except Exception as e:
+        # Real type + traceback go to the server log; the client gets a generic message.
+        logger.exception(
+            "Report processing failed with %s.%s",
+            type(e).__module__, type(e).__name__,
+        )
         raise HTTPException(status_code=500, detail="Could not process this report.")
     finally:
         if os.path.exists(file_path):
