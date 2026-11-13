@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pymupdf
 import pytest
 from google.genai import errors as genai_errors
@@ -11,7 +13,10 @@ def no_real_model(monkeypatch):
     def _blocked():
         raise AssertionError("Tests must not call the real model client.")
     monkeypatch.setattr(explainer, "_get_client", _blocked)
-    monkeypatch.setattr(explainer.time, "sleep", lambda s: None)
+    # Skip retry back-off in the explainer only. Patching `explainer.time.sleep`
+    # would replace time.sleep for the whole process and break other code
+    # (Streamlit's AppTest runner busy-loops and times out).
+    monkeypatch.setattr(explainer, "time", SimpleNamespace(sleep=lambda s: None))
 
 
 def make_pdf(text: str | None) -> bytes:

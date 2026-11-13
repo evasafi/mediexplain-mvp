@@ -1,4 +1,4 @@
-# MediExplain (MVP backend)
+# MediExplain (MVP)
 
 Upload a lab report PDF and get a plain-language explanation of each marker
 (value, unit, reference range, low/normal/high flag, short explanation),
@@ -70,7 +70,20 @@ GEMINI_API_KEY=your-key-here
 uvicorn backend.main:app --reload
 ```
 
-In a second terminal:
+Start the web page in a second terminal:
+
+```powershell
+streamlit run frontend/app.py
+```
+
+It opens at http://localhost:8501. The page calls the backend over HTTP.
+To use a backend somewhere else, set its URL first:
+
+```powershell
+$env:MEDIEXPLAIN_API_URL = "http://127.0.0.1:8000"
+```
+
+To test the backend alone from a terminal instead:
 
 ```powershell
 python try_report.py sample_cbc.pdf
