@@ -1,6 +1,6 @@
 # MediExplain (MVP)
 
-Upload a lab report PDF and get a plain-language explanation of each marker
+Upload a lab report (PDF, PNG or JPG) and get a plain-language explanation of each marker
 (value, unit, reference range, low/normal/high flag, short explanation),
 3 to 5 questions to ask a doctor, and a disclaimer.
 
@@ -19,8 +19,16 @@ Upload a lab report PDF and get a plain-language explanation of each marker
 
 ## How it works
 
-1. `POST /reports/upload` checks the file: 10 MB max, must start with `%PDF`.
-2. PyMuPDF extracts the text layer (`backend/services/parser.py`).
+1. `POST /reports/upload` checks the file: 10 MB max, and the type is decided by
+   its signature (magic bytes): PDF, PNG or JPG. The file name and the browser's
+   content type are ignored.
+2. Text extraction (`backend/services/parser.py`):
+   - PDF pages with a text layer are read directly with PyMuPDF.
+   - Images and PDF pages without a text layer (scans) are read with OCR:
+     PyMuPDF's built-in Tesseract engine with Tesseract's English data, at 300 DPI,
+     up to 10 pages. Images over 40 megapixels are refused before decoding.
+   - The response says `ocr_used: true` when any text came from OCR, and the
+     web page then asks the user to compare numbers with the original.
 3. The first 30,000 characters go to Gemini with a guardrailed system prompt
    and a structured output schema (`backend/services/explainer.py`).
    Models are tried in order with retries on server errors.
@@ -44,9 +52,10 @@ Upload a lab report PDF and get a plain-language explanation of each marker
 
 | Situation | HTTP |
 |---|---|
-| Not a PDF | 400 |
+| Not a PDF, PNG or JPG by signature, or a damaged file | 400 |
 | Over 10 MB | 413 |
-| No readable text (for example a scanned PDF) | 422 |
+| No readable text, even after OCR | 422 |
+| OCR needed but Tesseract is not installed on the server | 501 |
 | Model busy, timed out, or rate-limited (429) on every model | 503 |
 | Anything else | 500 (generic message; real type and traceback in the server log) |
 
@@ -57,6 +66,22 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements-dev.txt
 ```
+
+### OCR (for photos and scanned reports)
+
+Install Tesseract for Windows (free, open source). The UB Mannheim build is the
+usual choice: https://github.com/UB-Mannheim/tesseract/wiki . Keep the default
+folder `C:\Program Files\Tesseract-OCR`, and English is included. The backend
+finds it there, or on PATH, or through `TESSDATA_PREFIX`. Check with:
+
+```powershell
+curl.exe http://127.0.0.1:8000/health
+```
+
+`"ocr_available": true` means it was found. Without Tesseract, text PDFs still
+work and images return 501.
+
+### API key
 
 Create `.env` in the project root with your key. Never commit this file.
 
@@ -115,12 +140,15 @@ The tests mock the model and never call Gemini.
 
 ## Known limitations
 
-- Text-layer PDFs only. Images and scanned PDFs return 422 until OCR is added.
+- OCR is English only, and handwritten reports are not supported.
+- OCR can misread numbers. Task 2's verification then checks the model against
+  the OCR text, not against the original image.
 - Only the first 30,000 characters of a report are sent to the model.
 - Gemini often returns 503 under load. The end-to-end time target has not been measured.
 
 ## Licences
 
+Tesseract is licensed under Apache-2.0.
 PyMuPDF is licensed under the **AGPL-3.0** (or a commercial licence from Artifex).
 Using it in a deployed service can carry AGPL obligations. Check this before any
 public deployment.

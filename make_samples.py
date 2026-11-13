@@ -35,7 +35,24 @@ def write_pdf(path: str, lines: list[str]) -> None:
     doc.close()
 
 
+def write_images(source_pdf: str = "sample_cbc.pdf", dpi: int = 200) -> None:
+    """Image versions of a text PDF, to test OCR: PNG, JPG and an image-only 'scan'."""
+    with pymupdf.open(source_pdf) as src:
+        pix = src[0].get_pixmap(dpi=dpi)
+    pix.save("sample_cbc.png")
+    pix.save("sample_cbc.jpg", jpg_quality=85)
+    # A scanned PDF: one page that holds only a picture, no text layer.
+    scan = pymupdf.open()
+    page = scan.new_page(width=pix.width * 72 / dpi, height=pix.height * 72 / dpi)
+    page.insert_image(page.rect, filename="sample_cbc.png")
+    scan.save("sample_scanned.pdf", deflate=True, garbage=4)
+    scan.close()
+    for name in ("sample_cbc.png", "sample_cbc.jpg", "sample_scanned.pdf"):
+        print("wrote", name)
+
+
 if __name__ == "__main__":
     for name, lines in SAMPLES.items():
         write_pdf(name, lines)
         print("wrote", name)
+    write_images()

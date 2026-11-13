@@ -24,18 +24,30 @@ DEFAULT_DISCLAIMER = (
 )
 
 FRIENDLY_ERRORS = {
-    400: "This file doesn't look like a PDF. Please upload your lab report as a PDF.",
-    413: "This file is larger than 10 MB. Please upload a smaller PDF.",
+    400: (
+        "We couldn't open this file. Please upload your lab report as a PDF, PNG or JPG. "
+        "If it is one of those, the file may be damaged or the image too large."
+    ),
+    413: "This file is larger than 10 MB. Please upload a smaller file.",
     422: (
-        "We couldn't find any readable text in this PDF. It may be a scanned page or a photo. "
-        "Scanned reports and images are not supported yet. If you can, download a digital "
-        "copy of the report from your lab's website or app and try again."
+        "We couldn't find any readable text in this file. If it's a photo, try again with "
+        "a sharp, well-lit, straight picture of the whole page. A digital PDF from your "
+        "lab's website or app works best."
+    ),
+    501: (
+        "Reading photos and scanned reports is not available right now. "
+        "Please upload a digital PDF of your report instead."
     ),
     503: (
         "The explanation service is busy right now. Your report was not saved. "
         "Please wait a minute and try again."
     ),
 }
+MIME_TYPES = {"pdf": "application/pdf", "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg"}
+OCR_NOTE = (
+    "This report was read from an image, so some numbers may have been misread. "
+    "Compare each result with your original report."
+)
 GENERIC_ERROR = "Something went wrong while explaining this report. Please try again."
 
 STATUS_LABEL = {"low": "LOW", "high": "HIGH", "normal": "Normal", "unknown": "Unknown"}
@@ -58,7 +70,8 @@ def explain_report(file_name: str, data: bytes) -> tuple[dict | None, str | None
     try:
         r = requests.post(
             f"{API_URL}/reports/upload",
-            files={"file": (file_name, data, "application/pdf")},
+            # The backend checks the real type by file signature; this is only a hint.
+            files={"file": (file_name, data, mime_type(file_name))},
             timeout=REQUEST_TIMEOUT_S,
         )
     except requests.exceptions.Timeout:
@@ -74,6 +87,11 @@ def explain_report(file_name: str, data: bytes) -> tuple[dict | None, str | None
         return r.json(), None
     except ValueError:
         return None, GENERIC_ERROR
+
+
+def mime_type(file_name: str) -> str:
+    ext = file_name.rsplit(".", 1)[-1].lower() if "." in file_name else ""
+    return MIME_TYPES.get(ext, "application/octet-stream")
 
 
 def marker_status(marker: dict) -> str:
@@ -118,6 +136,8 @@ def render_result(result: dict) -> None:
         st.error(result["emergency_notice"], icon="🚨")
 
     st.subheader(result.get("document_type") or "Your report")
+    if result.get("ocr_used"):
+        st.warning(OCR_NOTE, icon="📷")
     if result.get("summary"):
         st.write(result["summary"])
 
@@ -171,7 +191,7 @@ def main() -> None:
     st.info(disclaimer, icon="ℹ️")
 
     uploaded = st.file_uploader(
-        "Lab report (PDF, up to 10 MB)", type=["pdf"],
+        "Lab report (PDF, PNG or JPG, up to 10 MB)", type=["pdf", "png", "jpg", "jpeg"],
         help="Your file is only used to create this explanation and is not stored.",
     )
     if uploaded is None and "file_id" in st.session_state:

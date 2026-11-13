@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import os
 import uuid
 
@@ -6,7 +6,13 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from google.genai import errors as genai_errors
 
 from backend.services.explainer import generate_explanation
-from backend.services.parser import parse_pdf_text
+from backend.services.parser import (
+    OcrUnavailableError,
+    UnreadableFileError,
+    UnsupportedFileError,
+    detect_kind,
+    extract_text,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -21,23 +27,36 @@ def upload_and_parse_report(file: UploadFile = File(...)):
     data = file.file.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
         raise HTTPException(status_code=413, detail="File too large (10 MB max).")
-    if not data.startswith(b"%PDF"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
+    try:
+        # Decided by the file's signature, never by its name or content type.
+        kind = detect_kind(data)
+    except UnsupportedFileError:
+        raise HTTPException(status_code=400, detail="Only PDF, PNG or JPG files are supported.")
 
-    file_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}.pdf")
+    file_path = os.path.join(UPLOAD_DIR, f"{uuid.uuid4().hex}.{kind}")
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(data)
 
-        full_text = parse_pdf_text(file_path)
-        if not full_text or not full_text.strip():
+        extracted = extract_text(file_path, kind)
+        if not extracted.text.strip():
             raise HTTPException(
                 status_code=422,
-                detail="No readable text found. Scanned PDFs are not supported yet.",
+                detail="No readable text found in this file.",
             )
-        result = generate_explanation(full_text)
+        result = generate_explanation(extracted.text)
+        result["ocr_used"] = extracted.ocr_used
     except HTTPException:
         raise
+    except UnreadableFileError as e:
+        logger.warning("Unreadable %s upload: %s", kind, e)
+        raise HTTPException(status_code=400, detail="This file could not be read. It may be damaged.")
+    except OcrUnavailableError:
+        logger.exception("OCR needed but not set up on this server")
+        raise HTTPException(
+            status_code=501,
+            detail="Reading images and scanned reports is not set up on this server.",
+        )
     except genai_errors.ServerError as e:
         logger.exception("Model unavailable after retries: %s", type(e).__name__)
         raise HTTPException(

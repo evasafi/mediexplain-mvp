@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 
 from backend.main import app
 from backend.routers import reports
+from backend.services import parser
+from backend.services.parser import ExtractedText
 from tests.conftest import make_pdf, server_error
 
 FAKE_RESULT = {
@@ -56,14 +58,17 @@ def test_rejects_file_over_10mb(client, upload_dir):
 
 def test_accepts_file_at_exactly_10mb_limit(client, monkeypatch):
     # Size check must allow MAX_BYTES itself; it then fails parsing, not size.
-    monkeypatch.setattr(reports, "parse_pdf_text", lambda p: "")
-    r = post(client, b"%PDF" + b"0" * (reports.MAX_BYTES - 4))
+    monkeypatch.setattr(reports, "extract_text", lambda p, k: ExtractedText("", k, False))
+    r = post(client, b"%PDF-" + b"0" * (reports.MAX_BYTES - 5))
     assert r.status_code == 422
 
 
 def test_pdf_without_text_returns_422(client, upload_dir, monkeypatch):
+    # A blank page goes to OCR; OCR finds nothing -> 422.
     called = []
     monkeypatch.setattr(reports, "generate_explanation", lambda t: called.append(t))
+    monkeypatch.setattr(parser, "find_tessdata", lambda: "fake-tessdata")
+    monkeypatch.setattr(parser, "_ocr_page", lambda page, tessdata: "")
     r = post(client, make_pdf(None))
     assert r.status_code == 422
     assert called == []

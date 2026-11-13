@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from backend.routers import reports
+from backend.services.parser import ocr_available
 
 logging.basicConfig(
     level=logging.INFO,
@@ -34,4 +35,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 @app.get("/health", tags=["Health"])
 def health_check():
-    return {"status": "healthy", "service": "MediExplain Stateless Backend"}
+    return {
+        "status": "healthy",
+        "service": "MediExplain Stateless Backend",
+        "ocr_available": ocr_available(),
+    }

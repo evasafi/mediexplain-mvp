@@ -187,3 +187,31 @@ def test_emergency_notice_is_shown():
 def test_error_message_is_shown():
     at = run_app(error=app.FRIENDLY_ERRORS[503])
     assert at.error[0].value == app.FRIENDLY_ERRORS[503]
+
+
+# ---- task 5: images and OCR -------------------------------------------------------
+
+@pytest.mark.parametrize("name,mime", [
+    ("r.pdf", "application/pdf"), ("r.PNG", "image/png"), ("r.jpg", "image/jpeg"),
+    ("r.jpeg", "image/jpeg"), ("noext", "application/octet-stream"),
+])
+def test_mime_type_hint(name, mime):
+    assert app.mime_type(name) == mime
+
+
+def test_501_message_suggests_digital_pdf():
+    assert "digital PDF" in app.friendly_error(501)
+
+
+def test_ocr_note_shown_only_when_ocr_used():
+    at = run_app(result={**RESULT, "ocr_used": True})
+    assert app.OCR_NOTE in [w.value for w in at.warning]
+    at = run_app(result={**RESULT, "ocr_used": False})
+    assert app.OCR_NOTE not in [w.value for w in at.warning]
+
+
+def test_uploader_accepts_images():
+    at = run_app()
+    src = Path(APP_FILE).read_text(encoding="utf-8")
+    assert 'type=["pdf", "png", "jpg", "jpeg"]' in src
+    assert not at.exception
