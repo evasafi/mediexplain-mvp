@@ -9,6 +9,7 @@ from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel
 
+from backend.services.conflicts import find_conflicts, fix_questions, fix_summary
 from backend.services.emergency import find_emergency_terms
 from backend.services.glossary import format_for_prompt, retrieve
 from backend.services.verifier import verify_markers
@@ -174,13 +175,19 @@ def generate_explanation(full_text):
     # Do not trust the model silently: check values, ranges and lab flags in code.
     markers, warnings = verify_markers([m.model_dump() for m in result.markers], full_text)
 
+    # A lab flag that contradicts its printed range must show up in the summary
+    # and the doctor questions, never be hidden behind "all values are normal".
+    conflicts = find_conflicts(markers)
+    summary = fix_summary(result.summary, conflicts)
+    questions = fix_questions(result.questions_for_doctor, conflicts)
+
     return {
         "disclaimer": DISCLAIMER,
         "emergency_notice": emergency,
         "document_type": result.document_type,
-        "summary": result.summary,
+        "summary": summary,
         "markers": markers,
-        "recommendations": result.questions_for_doctor,
+        "recommendations": questions,
         "warnings": warnings,
         # Glossary definitions given to the model, with the credit MedlinePlus asks for.
         "glossary_sources": [{"title": e["title"], "url": e["url"]} for e in glossary_entries],
