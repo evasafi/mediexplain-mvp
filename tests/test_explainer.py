@@ -168,3 +168,9 @@ def test_all_rate_limited_raises_429(monkeypatch):
     with pytest.raises(genai_errors.ClientError) as exc:
         explainer.generate_explanation("report")
     assert exc.value.code == 429
+
+
+def test_no_emergency_notice_for_words_that_only_contain_a_term(monkeypatch):
+    use_fake(monkeypatch, [ok()])
+    out = explainer.generate_explanation("Stroke volume 70 mL. No critical values. Aseptic draw.")
+    assert out["emergency_notice"] is None

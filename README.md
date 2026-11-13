@@ -13,6 +13,9 @@ Upload a lab report PDF and get a plain-language explanation of each marker
   read, and **always deleted** in a `finally` block before the response is sent.
 - Nothing about the report is stored after the request ends.
 - The disclaimer and the emergency notice are added by code, not by the model.
+- The emergency notice is triggered by a reviewed list of urgent wording
+  (`backend/services/emergency.py`): whole words only, with narrow handling of
+  negation such as "No critical values". Each term has a written reason.
 
 ## How it works
 

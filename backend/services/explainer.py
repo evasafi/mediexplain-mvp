@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import os
 import time
 from typing import Literal
@@ -8,6 +8,7 @@ from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel
 
+from backend.services.emergency import find_emergency_terms
 from backend.services.verifier import verify_markers
 
 load_dotenv()
@@ -26,10 +27,6 @@ DISCLAIMER = (
     "or a treatment plan. Always talk to a qualified healthcare professional about your results."
 )
 
-EMERGENCY_TERMS = (
-    "critical value", "panic value", "life-threatening", "cardiac arrest",
-    "respiratory failure", "organ failure", "sepsis", "stroke",
-)
 EMERGENCY_NOTICE = (
     "Parts of this report contain wording that can signal an urgent problem. "
     "If you feel seriously unwell, or your doctor told you this is urgent, "
@@ -128,8 +125,11 @@ def generate_explanation(full_text):
     text = full_text[:MAX_CHARS]
     result = _call_model(text)
 
-    lowered = full_text.lower()
-    emergency = EMERGENCY_NOTICE if any(t in lowered for t in EMERGENCY_TERMS) else None
+    # Decided by code on the full text, never by the model. See emergency.py.
+    urgent_terms = find_emergency_terms(full_text)
+    if urgent_terms:
+        logger.info("Emergency notice added; matched terms: %s", ", ".join(urgent_terms))
+    emergency = EMERGENCY_NOTICE if urgent_terms else None
 
     # Do not trust the model silently: check values, ranges and lab flags in code.
     markers, warnings = verify_markers([m.model_dump() for m in result.markers], full_text)
