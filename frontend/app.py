@@ -180,6 +180,12 @@ def render_result(result: dict) -> None:
             file_name="questions_for_my_doctor.txt", mime="text/plain",
         )
 
+    sources = result.get("glossary_sources") or []
+    if sources:
+        links = ", ".join(f"[{s['title']}]({s['url']})" for s in sources)
+        credit = result.get("glossary_attribution") or "Source: MedlinePlus, National Library of Medicine"
+        st.caption(f"Test definitions used: {links}. {credit}.")
+
 
 def main() -> None:
     st.set_page_config(page_title="MediExplain", page_icon="🩺", layout="centered")

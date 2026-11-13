@@ -32,7 +32,18 @@ Upload a lab report (PDF, PNG or JPG) and get a plain-language explanation of ea
 3. The first 30,000 characters go to Gemini with a guardrailed system prompt
    and a structured output schema (`backend/services/explainer.py`).
    Models are tried in order with retries on server errors.
-4. **Verification** (`backend/services/verifier.py`). Code does not trust the
+4. **Glossary retrieval (RAG)** (`backend/services/glossary.py`). Each report line
+   is reduced to its test-name words and looked up in an in-memory ChromaDB index of
+   52 MedlinePlus lab-test definitions (`backend/data/glossary.json`). Up to 8 close
+   matches go to the model in a `<glossary>` block before the report, with a prompt
+   rule to use them only to explain what a test measures. Definitions are trimmed to
+   "what the test measures": sentences about causes, conditions or medicines are
+   removed when the data is built. The response adds `glossary_sources` and
+   `glossary_attribution`, and the web page shows the credit. Nothing is stored:
+   the index lives in memory and report lines are only used as queries. If retrieval
+   fails, the explanation runs without it. Rebuild the data with
+   `python scripts/build_glossary.py`.
+5. **Verification** (`backend/services/verifier.py`). Code does not trust the
    model silently. For each marker it finds the marker's row in the report text and checks:
    - the value really appears in that row (numbers compared by value, so
      Indian grouping like `1,32,000` and `132000` match);
@@ -44,7 +55,7 @@ Upload a lab report (PDF, PNG or JPG) and get a plain-language explanation of ea
    Anything that does not line up sets `verified: false` and adds a warning.
    The model's `status` is never overwritten. `range_status` is what code computed
    from the printed range.
-5. The API returns JSON:
+6. The API returns JSON:
    `status`, `disclaimer`, `emergency_notice`, `document_type`, `summary`,
    `markers` (`name`, `value`, `unit`, `reference_range`, `status`, `explanation`,
    plus added `verified`, `range_status`, `lab_flag`, `verification_notes`),
@@ -149,6 +160,13 @@ The tests mock the model and never call Gemini.
 ## Licences
 
 Tesseract is licensed under Apache-2.0.
+
+Glossary text: MedlinePlus lab test information is public domain (U.S. government
+work). Source: MedlinePlus, National Library of Medicine.
+https://medlineplus.gov/about/using/usingcontent/ (checked 2026-11-13).
+ChromaDB and its default embedding model (all-MiniLM-L6-v2) are Apache-2.0. The model
+(about 80 MB) downloads to `~/.cache/chroma` on first use, so the first run needs
+internet access.
 PyMuPDF is licensed under the **AGPL-3.0** (or a commercial licence from Artifex).
 Using it in a deployed service can carry AGPL obligations. Check this before any
 public deployment.

@@ -49,7 +49,8 @@ def test_response_shape_and_code_added_disclaimer(monkeypatch):
     out = explainer.generate_explanation("Hemoglobin 10.2 g/dL 13.0-17.0")
     # Original fields teammates build against, plus the added `warnings`.
     assert set(out) == {"disclaimer", "emergency_notice", "document_type",
-                        "summary", "markers", "recommendations", "warnings"}
+                        "summary", "markers", "recommendations", "warnings",
+                        "glossary_sources", "glossary_attribution"}
     assert out["disclaimer"] == explainer.DISCLAIMER
     assert out["emergency_notice"] is None
     original = {

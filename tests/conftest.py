@@ -17,6 +17,8 @@ def no_real_model(monkeypatch):
     # would replace time.sleep for the whole process and break other code
     # (Streamlit's AppTest runner busy-loops and times out).
     monkeypatch.setattr(explainer, "time", SimpleNamespace(sleep=lambda s: None))
+    # Explainer tests don't depend on the glossary index; test_glossary.py covers it.
+    monkeypatch.setattr(explainer, "retrieve", lambda text: ([], ""))
 
 
 def make_pdf(text: str | None) -> bytes:

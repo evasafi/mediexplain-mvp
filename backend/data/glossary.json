@@ -1,0 +1,424 @@
+{
+  "source": "MedlinePlus lab test information, National Library of Medicine",
+  "licence": "Public domain (U.S. government work). See https://medlineplus.gov/about/using/usingcontent/",
+  "attribution": "Source: MedlinePlus, National Library of Medicine",
+  "retrieved": "2026-11-13",
+  "entries": [
+    {
+      "title": "Complete Blood Count (CBC)",
+      "other_names": "",
+      "definition": "A complete blood count, or CBC, is a group of blood tests that measure the number and size of the different cells in your blood. A CBC measures: Other names for a complete blood count: CBC, full blood count, blood cell count",
+      "source_updated": "October 15, 2024",
+      "id": "complete-blood-count-cbc",
+      "url": "https://medlineplus.gov/lab-tests/complete-blood-count-cbc/"
+    },
+    {
+      "title": "Hemoglobin Test",
+      "other_names": "Hb, Hgb, H&H",
+      "definition": "A hemoglobin test measures the levels of hemoglobin in your blood. Hemoglobin is an iron-rich protein in your red blood cells. It carries oxygen from your lungs to the rest of your body. Your cells need oxygen to grow, reproduce, and make energy for you to function.",
+      "source_updated": "October 27, 2024",
+      "id": "hemoglobin-test",
+      "url": "https://medlineplus.gov/lab-tests/hemoglobin-test/"
+    },
+    {
+      "title": "Hematocrit Test",
+      "other_names": "HCT, packed cell volume, PCV, Crit; H and H (Hemoglobin and Hematocrit)",
+      "definition": "A hematocrit test is a blood test that measures the amount (percent) of your blood that is made up of red blood cells. Red blood cells carry oxygen from your lungs to the rest of your body.",
+      "source_updated": "November 25, 2024",
+      "id": "hematocrit-test",
+      "url": "https://medlineplus.gov/lab-tests/hematocrit-test/"
+    },
+    {
+      "title": "Red Blood Cell (RBC) Count",
+      "other_names": "erythrocyte count, red count, RBC Count",
+      "definition": "A red blood cell (RBC) count measures the number of red blood cells, also known as erythrocytes, in your blood. Red blood cells are made in your bone marrow, the spongy tissue inside your large bones. They contain hemoglobin, an iron-rich protein that carries oxygen from your lungs to every cell in your body. Your cells need oxygen to grow, reproduce, and make energy for you to function.",
+      "source_updated": "October 7, 2024",
+      "id": "red-blood-cell-rbc-count",
+      "url": "https://medlineplus.gov/lab-tests/red-blood-cell-rbc-count/"
+    },
+    {
+      "title": "Red Blood Cell (RBC) Indices",
+      "other_names": "erythrocyte indices",
+      "definition": "Red blood cell (RBC) indices measure your red blood cells' size, shape, and quality. Red blood cells are also known as erythrocytes. They are made in your bone marrow (the spongy tissue inside your large bones). They contain hemoglobin, an iron-rich protein in your red blood cells that carries oxygen from your lungs to every cell in your body.",
+      "source_updated": "October 7, 2024",
+      "id": "red-blood-cell-rbc-indices",
+      "url": "https://medlineplus.gov/lab-tests/red-blood-cell-rbc-indices/"
+    },
+    {
+      "title": "MCV (Mean Corpuscular Volume)",
+      "other_names": "CBC with differential, Mean Cell Volume, Mean Corpuscular Volume",
+      "definition": "MCV stands for mean corpuscular volume. An MCV blood test measures the average size of your red blood cells. Red blood cells carry oxygen from your lungs to every cell in your body. Your cells need oxygen to grow, reproduce, and make energy.",
+      "source_updated": "December 2, 2024",
+      "id": "mcv-mean-corpuscular-volume",
+      "url": "https://medlineplus.gov/lab-tests/mcv-mean-corpuscular-volume/"
+    },
+    {
+      "title": "RDW (Red Cell Distribution Width)",
+      "other_names": "RDW-SD (standard deviation) test, Erythrocyte Distribution Width",
+      "definition": "A red cell distribution width (RDW) test measures how much the volume and size of your red blood cells (erythrocytes) varies. Red blood cells are made in your bone marrow (the spongy tissue inside your large bones). They contain hemoglobin, an iron-rich protein that carries oxygen from your lungs to every cell in your body. Your cells need oxygen to grow, reproduce, and make energy for you to function.",
+      "source_updated": "October 15, 2024",
+      "id": "rdw-red-cell-distribution-width",
+      "url": "https://medlineplus.gov/lab-tests/rdw-red-cell-distribution-width/"
+    },
+    {
+      "title": "White Blood Count (WBC)",
+      "other_names": "WBC count, white cell count, white blood cell count, Leukocyte Count, WBC",
+      "definition": "A white blood count measures the number of white blood cells (WBCs) in your blood. White blood cells, also called leukocytes, are part of your immune system. They are a type of blood cell made in your bone marrow and found in your blood and lymph tissue (part of your immune system). There are five major types of white blood cells: A white blood count measures the total number of these cells in your blood.",
+      "source_updated": "August 6, 2024",
+      "id": "white-blood-count-wbc",
+      "url": "https://medlineplus.gov/lab-tests/white-blood-count-wbc/"
+    },
+    {
+      "title": "Blood Differential",
+      "other_names": "",
+      "definition": "White blood cells are also called leukocytes and WBCs. They are a type of blood cell that is made in your bone marrow and found in your blood and lymph tissue (which is part of your lymphatic system). White blood cells are an important part of your immune system. There are five different types of white blood cells: A blood differential test measures the amount and/or percentage of each type of white blood cell.",
+      "source_updated": "October 9, 2024",
+      "id": "blood-differential",
+      "url": "https://medlineplus.gov/lab-tests/blood-differential/"
+    },
+    {
+      "title": "Platelet Tests",
+      "other_names": "platelet count, PLT, PLT count thrombocyte count, platelet function tests, PFT, platelet function assay, PFA, platelet aggregation studies",
+      "definition": "Platelets, also known as thrombocytes, are small blood cells. They form in your bone marrow, the sponge-like tissue in your bones. Platelets are essential for blood clotting. A blood clot is a mass of blood that forms when platelets, proteins, and cells in the blood stick together.",
+      "source_updated": "August 15, 2024",
+      "id": "platelet-tests",
+      "url": "https://medlineplus.gov/lab-tests/platelet-tests/"
+    },
+    {
+      "title": "Reticulocyte Count",
+      "other_names": "retic count, reticulocyte percent, reticulocyte index, corrected reticulocyte, reticulocyte production index, RPI",
+      "definition": "A reticulocyte count (retic count) measures the number of reticulocytes in your blood. Reticulocytes are immature (still developing) red blood cells (RBCs). Your body makes reticulocytes in your bone marrow. Then it sends them into your blood, where they mature into red blood cells within one to two days.",
+      "source_updated": "April 10, 2024",
+      "id": "reticulocyte-count",
+      "url": "https://medlineplus.gov/lab-tests/reticulocyte-count/"
+    },
+    {
+      "title": "Erythrocyte Sedimentation Rate (ESR)",
+      "other_names": "ESR, SED rate sedimentation rate; Westergren sedimentation rate",
+      "definition": "Erythrocytes are red blood cells. The sedimentation rate is the time it takes for your red blood cells to settle at the bottom of a test tube. To do an ESR test, a sample of your blood is sent to a lab. A health care professional places the sample in a tall, thin test tube and measures how quickly your red blood cells settle or sink to the bottom of the tube.",
+      "source_updated": "December 2, 2024",
+      "id": "erythrocyte-sedimentation-rate-esr",
+      "url": "https://medlineplus.gov/lab-tests/erythrocyte-sedimentation-rate-esr/"
+    },
+    {
+      "title": "C-Reactive Protein (CRP) Test",
+      "other_names": "c-reactive protein, serum",
+      "definition": "A c-reactive protein test measures the level of c-reactive protein (CRP) in a sample of your blood. For example, when you get a cut on your skin, the area around the cut may turn red and swell.",
+      "source_updated": "June 11, 2025",
+      "id": "c-reactive-protein-crp-test",
+      "url": "https://medlineplus.gov/lab-tests/c-reactive-protein-crp-test/"
+    },
+    {
+      "title": "Basic Metabolic Panel (BMP)",
+      "other_names": "BMP, chemistry panel, chemistry screen, chem 7, electrolyte panel",
+      "definition": "A basic metabolic panel (BMP) measures eight different substances in your blood. It provides important information about your body's fluid balance, your metabolism (the process your body uses to make energy from food you eat), and how well your kidneys are working. This test is often used to check your general health.",
+      "source_updated": "September 10, 2024",
+      "id": "basic-metabolic-panel-bmp",
+      "url": "https://medlineplus.gov/lab-tests/basic-metabolic-panel-bmp/"
+    },
+    {
+      "title": "Comprehensive Metabolic Panel (CMP)",
+      "other_names": "chem 14, chemistry panel, chemistry screen, metabolic panel",
+      "definition": "A comprehensive metabolic panel (CMP) is a routine blood test that measures 14 different substances in a sample of your blood. It provides important information about your metabolism (how your body uses food and energy) and the balance of certain chemicals in your body.",
+      "source_updated": "December 4, 2023",
+      "id": "comprehensive-metabolic-panel-cmp",
+      "url": "https://medlineplus.gov/lab-tests/comprehensive-metabolic-panel-cmp/"
+    },
+    {
+      "title": "Electrolyte Panel",
+      "other_names": "serum electrolyte test, electrolyte blood test, electrolyte lab test, lytes, sodium (Na), potassium (K), chloride (Cl), carbon dioxide (CO2)",
+      "definition": "Electrolytes are minerals that have an electrical charge when they are dissolved in water or body fluids. They are important because they help: Electrolytes are in your blood, urine (pee), tissues, and other body fluids. An electrolyte panel is used to check for electrolyte, fluid, or pH imbalances. An electrolyte panel, also known as a serum electrolyte test, is a blood test that measures levels of the body's main electrolytes: You get these electrolytes from the foods you eat and the fluids you drink.",
+      "source_updated": "March 12, 2024",
+      "id": "electrolyte-panel",
+      "url": "https://medlineplus.gov/lab-tests/electrolyte-panel/"
+    },
+    {
+      "title": "Blood Glucose Test",
+      "other_names": "blood sugar, self-monitoring of blood glucose (SMBG), fasting plasma glucose (FPG), fasting blood sugar (FBS), fasting blood glucose (FBG), random blood sugar, glucose challenge test, oral glucose tolerance test (OGTT)",
+      "definition": "A blood glucose test measures the glucose levels in your blood. Glucose is a type of sugar. It is your body's main source of energy. It comes from the food you eat.",
+      "source_updated": "December 30, 2024",
+      "id": "blood-glucose-test",
+      "url": "https://medlineplus.gov/lab-tests/blood-glucose-test/"
+    },
+    {
+      "title": "Hemoglobin A1C (HbA1c) Test",
+      "other_names": "HbA1C, A1C, glycohemoglobin, glycated hemoglobin, glycosylated hemoglobin",
+      "definition": "A hemoglobin A1C (HbA1C) test is a blood test that shows your average level of blood glucose, also called blood sugar, over the past two to three months. Glucose is a type of sugar in your blood that comes from the foods you eat. Your cells use glucose for energy. A hormone called insulin helps glucose get into your cells.",
+      "source_updated": "May 20, 2025",
+      "id": "hemoglobin-a1c-hba1c-test",
+      "url": "https://medlineplus.gov/lab-tests/hemoglobin-a1c-hba1c-test/"
+    },
+    {
+      "title": "Sodium Blood Test",
+      "other_names": "Na test",
+      "definition": "A sodium blood test measures the amount of sodium in your blood. Sodium is a type of electrolyte. Electrolytes are minerals that have an electrical charge when they are dissolved in water or body fluids. They help control the amount of fluid and the balance of acids and bases (pH balance) in your body.",
+      "source_updated": "December 2, 2024",
+      "id": "sodium-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/sodium-blood-test/"
+    },
+    {
+      "title": "Potassium Blood Test",
+      "other_names": "potassium serum, serum potassium, serum electrolytes, K",
+      "definition": "A potassium blood test measures the amount of potassium in your blood. Potassium is a type of electrolyte. Electrolytes are electrically charged minerals that help control the amount of fluids and the balance of acids and bases (pH balance) in your body. They also help control muscle and nerve activity and perform other important functions.",
+      "source_updated": "November 12, 2024",
+      "id": "potassium-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/potassium-blood-test/"
+    },
+    {
+      "title": "Chloride Blood Test",
+      "other_names": "CI, Serum chloride",
+      "definition": "A chloride blood test measures the amount of chloride in your blood. Chloride is a type of electrolyte. Electrolytes are electrically charged minerals that help control the amount of fluids and the balance of acids and bases (pH balance) in your body. You get chloride through the food you eat.",
+      "source_updated": "November 5, 2024",
+      "id": "chloride-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/chloride-blood-test/"
+    },
+    {
+      "title": "Carbon Dioxide (CO2) in Blood",
+      "other_names": "carbon dioxide content, CO2 content, carbon dioxide blood test, bicarbonate blood test, bicarbonate test, total CO2; TCO2; carbon dioxide content; CO2 content; bicarb; HCO3",
+      "definition": "A carbon dioxide (CO2) blood test measures the amount of carbon dioxide in your blood. Carbon dioxide is an odorless, colorless gas. It is a waste product from metabolism, the process your body uses to make energy from food you eat. Most of the carbon dioxide in your body is in the form of bicarbonate (HCO3), which is a type of electrolyte.",
+      "source_updated": "November 12, 2024",
+      "id": "carbon-dioxide-co2-in-blood",
+      "url": "https://medlineplus.gov/lab-tests/carbon-dioxide-co2-in-blood/"
+    },
+    {
+      "title": "Calcium Blood Test",
+      "other_names": "total calcium, ionized calcium",
+      "definition": "A calcium blood test measures the amount of calcium in your blood. Calcium is one of the most important minerals in your body. About 1% of the calcium in your body is in your blood. The rest is stored in your bones and teeth.",
+      "source_updated": "December 2, 2024",
+      "id": "calcium-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/calcium-blood-test/"
+    },
+    {
+      "title": "Magnesium Blood Test",
+      "other_names": "Mg, Mag, Magnesium-Serum",
+      "definition": "A magnesium blood test measures the amount of magnesium in a sample of your blood. Magnesium is a mineral that you get from many kinds of foods you eat. Some examples include nuts, seeds, beans, fortified breakfast cereals, green leafy vegetables, and milk. Your body needs magnesium to help your muscles, nerves, and heart work properly.",
+      "source_updated": "October 25, 2023",
+      "id": "magnesium-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/magnesium-blood-test/"
+    },
+    {
+      "title": "Phosphate in Blood",
+      "other_names": "phosphorus test, P, PO4, phosphorus-serum, phosphate, inorganic phosphorus",
+      "definition": "A phosphate in blood test measures the amount of phosphate in a sample of your blood. Phosphate contains the mineral phosphorus. So, a phosphate test is sometimes called a phosphorus test. Phosphate is a type of electrolyte.",
+      "source_updated": "October 25, 2023",
+      "id": "phosphate-in-blood",
+      "url": "https://medlineplus.gov/lab-tests/phosphate-in-blood/"
+    },
+    {
+      "title": "BUN (Blood Urea Nitrogen)",
+      "other_names": "",
+      "definition": "A BUN, or blood urea nitrogen test, measures the amount of urea nitrogen in your blood. Urea nitrogen is a waste product that forms as your body breaks down proteins. It's carried in your blood and then removed by your kidneys when you urinate (pee). Having a small amount of urea nitrogen in your blood is normal.",
+      "source_updated": "October 27, 2024",
+      "id": "bun-blood-urea-nitrogen",
+      "url": "https://medlineplus.gov/lab-tests/bun-blood-urea-nitrogen/"
+    },
+    {
+      "title": "Creatinine Test",
+      "other_names": "blood creatinine, serum creatinine, urine creatinine, kidney function, renal function",
+      "definition": "This test measures creatinine levels in a sample of your blood and/or urine (pee). Creatinine is a normal waste product in your body. It's made when you use your muscles and some of the muscle tissue breaks down. Normally, your kidneys filter creatinine from your blood and remove it from your body in your urine.",
+      "source_updated": "December 5, 2023",
+      "id": "creatinine-test",
+      "url": "https://medlineplus.gov/lab-tests/creatinine-test/"
+    },
+    {
+      "title": "Estimated Glomerular Filtration Rate (eGFR) and GFR Tests",
+      "other_names": "estimated GFR, eGFR, calculated glomerular filtration rate, cGFR",
+      "definition": "Estimated glomerular filtration rate (eGFR) and GFR tests check how well your kidneys are working. Your kidneys are two organs on either side of your spine just below your rib cage. They have tiny filters called glomeruli. These filters remove waste and extra water from your blood and get rid of them through your urine (pee).",
+      "source_updated": "September 30, 2026",
+      "id": "estimated-glomerular-filtration-rate-egfr-and-gfr-tests",
+      "url": "https://medlineplus.gov/lab-tests/estimated-glomerular-filtration-rate-egfr-and-gfr-tests/"
+    },
+    {
+      "title": "Uric Acid Test",
+      "other_names": "serum urate, UA, uric acid: serum and urine",
+      "definition": "A uric acid test measures the amount of uric acid in a sample of your blood or urine (pee). Uric acid is a normal waste product that your body makes when it breaks down chemicals called purines. These chemicals come from your cells when they die and can be found in certain foods and beverages. Normally, uric acid dissolves in your blood and is filtered out by the kidneys.",
+      "source_updated": "July 15, 2026",
+      "id": "uric-acid-test",
+      "url": "https://medlineplus.gov/lab-tests/uric-acid-test/"
+    },
+    {
+      "title": "Microalbumin Creatinine Ratio",
+      "other_names": "albumin-creatinine ratio; urine albumin; microalbumin, urine; ACR; UACR",
+      "definition": "A microalbumin creatinine ratio urine test checks the levels of the protein albumin in your urine (pee). Your kidneys are two organs on either side of your spine near your waist. Filters in your kidneys remove waste and extra water from your blood and gets rid of them through urine. Albumin, however, is not a waste product.",
+      "source_updated": "May 27, 2025",
+      "id": "microalbumin-creatinine-ratio",
+      "url": "https://medlineplus.gov/lab-tests/microalbumin-creatinine-ratio/"
+    },
+    {
+      "title": "Liver Function Tests",
+      "other_names": "liver panel, liver function panel, liver profile hepatic function panel, LFT",
+      "definition": "Liver function tests (also called a liver panel) use a sample of your blood to measure several substances made by your liver.",
+      "source_updated": "December 5, 2023",
+      "id": "liver-function-tests",
+      "url": "https://medlineplus.gov/lab-tests/liver-function-tests/"
+    },
+    {
+      "title": "ALT Blood Test",
+      "other_names": "Alanine aminotransferase (ALT), Serum Glutamic-Pyruvic Transaminase (SGPT), GPT, Alanine Transaminase",
+      "definition": "An ALT test measures the amount of ALT in your blood. ALT (alanine transaminase) is an enzyme, a protein that speeds up certain chemical reactions in your body. It is found mainly in your liver. But when liver cells are damaged, they release ALT into the bloodstream.",
+      "source_updated": "November 5, 2024",
+      "id": "alt-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/alt-blood-test/"
+    },
+    {
+      "title": "AST Test",
+      "other_names": "SGOT test, serum glutamic oxaloacetic transaminase test; aspartate transaminase test",
+      "definition": "An AST blood test measures the amount of AST in your blood. AST (aspartate aminotransferase) is an enzyme, a protein that speeds up certain chemical reactions in your body. It is found mainly in your liver but also in your heart, muscles, and other tissues. When your liver or other cells that contain AST are damaged, they release AST into your blood.",
+      "source_updated": "November 5, 2024",
+      "id": "ast-test",
+      "url": "https://medlineplus.gov/lab-tests/ast-test/"
+    },
+    {
+      "title": "Alkaline Phosphatase",
+      "other_names": "ALP, ALK, PHOS, Alkp, ALK PHOS",
+      "definition": "An alkaline phosphatase (ALP) test measures the amount of ALP in your blood. ALP is an enzyme, a protein that speeds up certain chemical reactions in your body. ALP is found in all your body tissues, but higher amounts can be found in your liver, bile ducts, and bones. Each part of your body makes a different type of ALP.",
+      "source_updated": "November 5, 2024",
+      "id": "alkaline-phosphatase",
+      "url": "https://medlineplus.gov/lab-tests/alkaline-phosphatase/"
+    },
+    {
+      "title": "Bilirubin Blood Test",
+      "other_names": "Total serum bilirubin, TSB total bilirubin, TBIL neonatal bilirubin, direct bilirubin, conjugated bilirubin, indirect bilirubin, unconjugated bilirubin",
+      "definition": "A bilirubin blood test measures the levels of bilirubin in your blood. Bilirubin is a yellowish substance made during your body's normal process of breaking down old red blood cells. Bilirubin is found in bile, a fluid your liver makes to help you digest food. If your liver is healthy, it will remove most of the bilirubin from your body through your bile ducts (the tubes that carry bile from your liver).",
+      "source_updated": "October 27, 2024",
+      "id": "bilirubin-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/bilirubin-blood-test/"
+    },
+    {
+      "title": "Gamma-glutamyl Transferase (GGT) Test",
+      "other_names": "gamma-glutamyl transpeptidase, GGTP, Gamma-GT, GTP",
+      "definition": "A gamma-glutamyl transferase (GGT) test measures the amount of GGT in your blood GGT is an enzyme. Enzymes are proteins that speed up certain chemical reactions in your body. Thousands of enzymes play an important role in all of your body functions. The GGT enzyme is found throughout your body, but it is mainly found in your liver.",
+      "source_updated": "July 29, 2024",
+      "id": "gamma-glutamyl-transferase-ggt-test",
+      "url": "https://medlineplus.gov/lab-tests/gamma-glutamyl-transferase-ggt-test/"
+    },
+    {
+      "title": "Albumin Blood Test",
+      "other_names": "ALB, serum albumin test",
+      "definition": "An albumin blood test measures the amount of albumin in your blood. Albumin is a protein made by your liver. Blood is made of fluid and blood cells. Albumin keeps the fluid part of your blood from leaking out of your blood vessels (the tubes your blood flows through) and into other tissues.",
+      "source_updated": "December 9, 2024",
+      "id": "albumin-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/albumin-blood-test/"
+    },
+    {
+      "title": "Globulin Test",
+      "other_names": "",
+      "definition": "Globulins are a group of proteins in your blood. Some globulins are made by your liver. Others are made by your immune system. There are different types of globulins called alpha, beta, and gamma globulins.",
+      "source_updated": "November 4, 2024",
+      "id": "globulin-test",
+      "url": "https://medlineplus.gov/lab-tests/globulin-test/"
+    },
+    {
+      "title": "Total Protein and Albumin/Globulin (A/G) Ratio",
+      "other_names": "total serum protein, TP albumin/globulin ratio, Total protein with A/G ratio",
+      "definition": "A total protein and albumin/globulin (A/G) ratio test measures the total amount of protein in your blood. Proteins have many important functions, including giving your body energy, rebuilding muscles, and helping your immune system. There are two major types of protein in the blood: albumin and globulin. Albumin makes up most of the protein in the blood, while the rest are called globulins.",
+      "source_updated": "October 20, 2024",
+      "id": "total-protein-and-albumin-globulin-a-g-ratio",
+      "url": "https://medlineplus.gov/lab-tests/total-protein-and-albumin-globulin-a-g-ratio/"
+    },
+    {
+      "title": "Cholesterol Levels",
+      "other_names": "",
+      "definition": "A cholesterol test is a blood test that measures the amount of cholesterol and triglycerides (a type of fat) in your blood. Cholesterol is a waxy, fat-like substance that's found in your blood and every cell of your body. Your body needs some cholesterol to make hormones, vitamin D, and substances that help you digest foods. Your liver makes all the cholesterol your body needs and removes excess amounts.",
+      "source_updated": "October 15, 2024",
+      "id": "cholesterol-levels",
+      "url": "https://medlineplus.gov/lab-tests/cholesterol-levels/"
+    },
+    {
+      "title": "Triglycerides Test",
+      "other_names": "",
+      "definition": "A triglycerides test is a blood test that measures the amount of a fat in your blood called triglycerides. Some triglycerides are important for good health. Your body uses them for energy. If you eat more calories than you need, your body turns the extra calories into triglycerides and stores them in your fat cells to use later.",
+      "source_updated": "December 9, 2024",
+      "id": "triglycerides-test",
+      "url": "https://medlineplus.gov/lab-tests/triglycerides-test/"
+    },
+    {
+      "title": "Lipoprotein (a) Blood Test",
+      "other_names": "cholesterol Lp(a), Lp(a)",
+      "definition": "A lipoprotein (a) test measures the level of lipoprotein (a) in your blood. Lipoproteins are particles made of protein and fats (lipids). They carry cholesterol through your bloodstream to your cells. Lipoprotein (a) is a type of LDL.",
+      "source_updated": "March 13, 2025",
+      "id": "lipoprotein-a-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/lipoprotein-a-blood-test/"
+    },
+    {
+      "title": "TSH (Thyroid-stimulating hormone) Test",
+      "other_names": "thyrotropin test, thyrotropic hormone",
+      "definition": "TSH stands for thyroid stimulating hormone. Another name for it is thyrotropin. A TSH test is a blood test that measures this hormone. The thyroid is a small, butterfly-shaped gland in the front of your neck.",
+      "source_updated": "October 30, 2024",
+      "id": "tsh-thyroid-stimulating-hormone-test",
+      "url": "https://medlineplus.gov/lab-tests/tsh-thyroid-stimulating-hormone-test/"
+    },
+    {
+      "title": "Thyroxine (T4) Test",
+      "other_names": "free thyroxine, free T4, total T4 concentration, Free T4 index (FTI), thyroxine screen, free T4 concentration, thyroxine test by equilibrium dialysis",
+      "definition": "Thyroxine is also called T4. T4 is a hormone that your thyroid gland makes. A T4 test measures the level of T4 in a sample of your blood. Your thyroid is a small, butterfly-shaped gland in the front of your neck.",
+      "source_updated": "December 12, 2024",
+      "id": "thyroxine-t4-test",
+      "url": "https://medlineplus.gov/lab-tests/thyroxine-t4-test/"
+    },
+    {
+      "title": "Iron Tests",
+      "other_names": "Serum Iron, Serum Fe, Ferritin Test, Serum Ferritin",
+      "definition": "Iron tests measure different substances in the blood to check iron levels in your body. Iron is a mineral that your body needs for growth and development. Your body uses iron to make hemoglobin, a protein in red blood cells. It carries oxygen from the lungs to all parts of the body, Iron is also important for healthy muscles, bone marrow, and organ function.",
+      "source_updated": "April 10, 2024",
+      "id": "iron-tests",
+      "url": "https://medlineplus.gov/lab-tests/iron-tests/"
+    },
+    {
+      "title": "Ferritin Blood Test",
+      "other_names": "serum ferritin, serum ferritin level, ferritin serum",
+      "definition": "A ferritin blood test measures the level of ferritin in your blood. Ferritin is a protein that binds to iron and stores it in your body. You need iron to make healthy red blood cells. Red blood cells carry oxygen from your lungs to the rest of your body.",
+      "source_updated": "March 18, 2025",
+      "id": "ferritin-blood-test",
+      "url": "https://medlineplus.gov/lab-tests/ferritin-blood-test/"
+    },
+    {
+      "title": "Vitamin B Test",
+      "other_names": "vitamin B testing, vitamin B complex, thiamine (B1), riboflavin (B2), niacin (B3), pantothenic acid (B5), pyridoxal phosphate (B6), biotin (B7), vitamin B12, folic acid, folate, and cobalamin test",
+      "definition": "A vitamin B test measures the amount of one or more B vitamins in your blood or urine (pee). B vitamins are nutrients that your body needs to work well and stay healthy. There are eight different types. All together, they are called the “B vitamin complex.” In general, B vitamins help your body: In addition to these general functions, each type of B vitamin can also play a more specialized role: B9 and B12 are often measured together in a vitamin B12 and folate test.",
+      "source_updated": "August 20, 2026",
+      "id": "vitamin-b-test",
+      "url": "https://medlineplus.gov/lab-tests/vitamin-b-test/"
+    },
+    {
+      "title": "Vitamin D Test",
+      "other_names": "25-hydroxyvitamin D, 25(OH)D, cholecalciferol test, ergocalciferol test, calcidiol test, vitamin D2 test, vitamin D3 test",
+      "definition": "A vitamin D test measures the levels of vitamin D in your blood. Vitamin D helps your body absorb calcium to build healthy bones and teeth. It also helps keep your muscles, nerves, and immune system working normally. You can get vitamin D from three sources: Before your body can use vitamin D, your liver must change it into another form called 25 hydroxyvitamin D, or 25(OH)D.",
+      "source_updated": "December 4, 2024",
+      "id": "vitamin-d-test",
+      "url": "https://medlineplus.gov/lab-tests/vitamin-d-test/"
+    },
+    {
+      "title": "Prothrombin Time Test and INR (PT/INR)",
+      "other_names": "prothrombin time/international normalized ratio, PT, pro time",
+      "definition": "A prothrombin time (PT) test measures how many seconds it takes for a clot to form in a blood sample. Since the results of this test can vary with different labs or test methods, your results may be used to create an INR (international normalized ratio). Using this ratio makes it easier for health care providers to compare and better understand results from different labs or test methods. Prothrombin is a protein made by the liver.",
+      "source_updated": "May 15, 2024",
+      "id": "prothrombin-time-test-and-inr-ptinr",
+      "url": "https://medlineplus.gov/lab-tests/prothrombin-time-test-and-inr-ptinr/"
+    },
+    {
+      "title": "Partial Thromboplastin Time (PTT) Test",
+      "other_names": "activated partial thromboplastin time, aPTT, intrinsic pathway coagulation factor profile",
+      "definition": "A partial thromboplastin time (PTT) test uses a blood sample to measure the number of seconds it takes for your blood to clot. These proteins are called coagulation factors or clotting factors, and your liver makes most of them. To get a more complete understanding of your blood’s ability to make a clot, your health care provider may order other tests alongside a PTT test. The most common of these is called a prothrombin time (PT) test.",
+      "source_updated": "July 14, 2026",
+      "id": "partial-thromboplastin-time-ptt-test",
+      "url": "https://medlineplus.gov/lab-tests/partial-thromboplastin-time-ptt-test/"
+    },
+    {
+      "title": "Prostate-Specific Antigen (PSA) Test",
+      "other_names": "total PSA, free PSA",
+      "definition": "A prostate-specific antigen (PSA) test is a blood test that measures the level of PSA in a sample of your blood. PSA is a protein made by your prostate. The prostate is a gland in the male reproductive system. It lies just below the bladder.",
+      "source_updated": "May 19, 2025",
+      "id": "prostate-specific-antigen-psa-test",
+      "url": "https://medlineplus.gov/lab-tests/prostate-specific-antigen-psa-test/"
+    },
+    {
+      "title": "Parathyroid Hormone (PTH) Test",
+      "other_names": "parathormone, intact PTH",
+      "definition": "This test measures the level of parathyroid hormone (PTH) in your blood. PTH, is made by your parathyroid glands. They are four pea-sized glands in your neck. Hormones are chemical messengers in your bloodstream.",
+      "source_updated": "December 4, 2023",
+      "id": "parathyroid-hormone-pth-test",
+      "url": "https://medlineplus.gov/lab-tests/parathyroid-hormone-pth-test/"
+    }
+  ]
+}
