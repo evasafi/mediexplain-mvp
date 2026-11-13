@@ -31,7 +31,9 @@ Upload a lab report (PDF, PNG or JPG) and get a plain-language explanation of ea
      web page then asks the user to compare numbers with the original.
 3. The first 30,000 characters go to Gemini with a guardrailed system prompt
    and a structured output schema (`backend/services/explainer.py`).
-   Models are tried in order with retries on server errors.
+   Models are tried in order: `gemini-3.8-flash`, `gemini-3.5-flash`, then
+   `gemini-3.5-flash-lite` as a fast last resort. Busy or timed-out models are retried
+   (60 s limit per call); rate-limited (429) or missing (404) models are skipped.
 4. **Glossary retrieval (RAG)** (`backend/services/glossary.py`). Each report line
    is reduced to its test-name words and looked up in an in-memory ChromaDB index of
    52 MedlinePlus lab-test definitions (`backend/data/glossary.json`). Up to 8 close

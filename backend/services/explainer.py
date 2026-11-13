@@ -15,7 +15,10 @@ from backend.services.verifier import verify_markers
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-MODELS = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
+# Tried in order. gemini-2.5-flash was dropped (2026-11-13): still listed for this
+# key but returns 404 on generateContent. gemini-3.5-flash-lite is the last resort:
+# lower quality than full Flash, but fast and usually not overloaded.
+MODELS = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"]
 MAX_CHARS = 30000
 RETRIES = 2  # per model
 # Per-call deadline. Without it a stalled Gemini call hangs the request forever.
