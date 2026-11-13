@@ -15,8 +15,8 @@ import streamlit as st
 
 API_URL = os.environ.get("MEDIEXPLAIN_API_URL", "http://127.0.0.1:8000").rstrip("/")
 MAX_BYTES = 10 * 1024 * 1024
-# Backend worst case: every model retried with a 60 s deadline. Wait a bit longer.
-REQUEST_TIMEOUT_S = 300
+# The backend gives the whole model chain 90 s (TOTAL_BUDGET_S). Wait a bit longer.
+REQUEST_TIMEOUT_S = 120
 
 DEFAULT_DISCLAIMER = (
     "This explanation is for education only and is not medical advice, a diagnosis, "
@@ -212,7 +212,7 @@ def main() -> None:
         st.session_state.pop("error", None)
 
     if uploaded is not None and st.button("Explain my report", type="primary"):
-        with st.spinner("Reading and explaining your report. This can take up to a minute..."):
+        with st.spinner("Reading and explaining your report. This usually takes a few seconds..."):
             result, error = explain_report(uploaded.name, uploaded.getvalue())
         st.session_state["result"] = result
         st.session_state["error"] = error

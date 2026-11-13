@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from time import monotonic as _now
 from typing import Literal
 
 from dotenv import load_dotenv
@@ -15,15 +16,24 @@ from backend.services.verifier import verify_markers
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-# Tried in order. gemini-2.5-flash was dropped (2026-11-13): still listed for this
-# key but returns 404 on generateContent. gemini-3.5-flash-lite is the last resort:
-# lower quality than full Flash, but fast and usually not overloaded.
-MODELS = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"]
+# Tried in order, fastest first (decided 2026-11-13). Measured on sample_cbc.pdf:
+# gemini-3.5-flash-lite answered correctly in about 2 s; the full Flash models took
+# 30-60 s or timed out. Code verification and the prompt rules apply to every model.
+# gemini-2.5-flash was dropped: still listed for this key but returns 404.
+MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.5-flash"]
+# Per-call deadline for each model, in seconds. Gemini enforces it server-side and
+# answers 504 DEADLINE_EXCEEDED. Without a deadline a stalled call hangs forever.
+MODEL_TIMEOUT_S = {"gemini-3.5-flash-lite": 20, "gemini-3.8-flash": 40, "gemini-3.5-flash": 40}
+DEFAULT_TIMEOUT_S = 40
+# The whole fallback chain must finish within this, so a request never waits minutes.
+TOTAL_BUDGET_S = 90
+# Gemini rejects very short deadlines (1 s returned 400), so never go below this.
+MIN_CALL_S = 10
+# A busy model (503) gets one quick retry. A timed-out model (504) is not retried:
+# waiting for it again just doubles the delay.
+RETRIES = 2
 MAX_CHARS = 30000
-RETRIES = 2  # per model
-# Per-call deadline. Without it a stalled Gemini call hangs the request forever.
-# Gemini enforces it server-side and answers 504 DEADLINE_EXCEEDED (a ServerError),
-# which the retry/fallback loop already handles.
+# Client-wide safety net; each call sets its own shorter deadline.
 TIMEOUT_MS = 60_000
 
 DISCLAIMER = (
@@ -92,31 +102,46 @@ def build_contents(text: str, glossary_block: str = "") -> str:
     return "\n\n".join(parts)
 
 
-def _call_model(text: str, glossary_block: str = "") -> ReportExplanation:
-    config = types.GenerateContentConfig(
+def _config(timeout_s: float) -> types.GenerateContentConfig:
+    return types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT,
         response_mime_type="application/json",
         response_schema=ReportExplanation,
         temperature=0.2,
+        http_options=types.HttpOptions(timeout=int(timeout_s * 1000)),
     )
+
+
+def _call_model(text: str, glossary_block: str = "") -> ReportExplanation:
     contents = build_contents(text, glossary_block)
+    deadline = _now() + TOTAL_BUDGET_S
     last_error = None
     for model in MODELS:
         for attempt in range(RETRIES):
+            remaining = deadline - _now()
+            timeout_s = min(MODEL_TIMEOUT_S.get(model, DEFAULT_TIMEOUT_S), remaining)
+            if timeout_s < MIN_CALL_S:
+                logger.warning("Time budget (%d s) used up; not trying %s", TOTAL_BUDGET_S, model)
+                break
+            started = _now()
             try:
                 response = _get_client().models.generate_content(
-                    model=model, contents=contents, config=config
+                    model=model, contents=contents, config=_config(timeout_s)
                 )
+                logger.info("%s answered in %.1f s", model, _now() - started)
                 if response.parsed is not None:
                     return response.parsed
                 return ReportExplanation.model_validate_json(response.text)
             except errors.ServerError as e:
                 last_error = e
                 logger.warning(
-                    "%s unavailable: %s %s (attempt %d/%d)",
-                    model, e.code, e.status, attempt + 1, RETRIES,
+                    "%s unavailable: %s %s after %.1f s (attempt %d/%d)",
+                    model, e.code, e.status, _now() - started, attempt + 1, RETRIES,
                 )
-                time.sleep(2 ** attempt)
+                if e.code == 504:
+                    break  # timed out: retrying would only double the wait
+                if attempt + 1 < RETRIES:
+                    time.sleep(1)
             except errors.ClientError as e:
                 if e.code == 429:
                     # Quota or rate limit for this model: retrying it now won't help,

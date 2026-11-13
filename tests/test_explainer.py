@@ -175,3 +175,84 @@ def test_no_emergency_notice_for_words_that_only_contain_a_term(monkeypatch):
     use_fake(monkeypatch, [ok()])
     out = explainer.generate_explanation("Stroke volume 70 mL. No critical values. Aseptic draw.")
     assert out["emergency_notice"] is None
+
+
+# ---- time budget and model order -------------------------------------------------
+
+def timed_out():
+    return genai_errors.ServerError(
+        504, {"error": {"code": 504, "message": "deadline", "status": "DEADLINE_EXCEEDED"}}
+    )
+
+
+class FakeClock:
+    """Each model call 'takes' the time it is told to, or its whole deadline on 504."""
+
+    def __init__(self):
+        self.t = 1000.0
+
+    def now(self):
+        return self.t
+
+
+def use_timed_fake(monkeypatch, outcomes, clock, seconds=None):
+    models = use_fake(monkeypatch, outcomes)
+    monkeypatch.setattr(explainer, "_now", clock.now)
+    original = models.generate_content
+
+    def generate_content(model, contents, config):
+        timeout_s = config.http_options.timeout / 1000
+        try:
+            return original(model, contents, config)
+        except genai_errors.ServerError as e:
+            clock.t += timeout_s if e.code == 504 else 1
+            raise
+        finally:
+            if seconds:
+                clock.t += seconds
+
+    monkeypatch.setattr(models, "generate_content", generate_content)
+    return models
+
+
+def test_fast_model_is_tried_first():
+    assert explainer.MODELS[0] == "gemini-3.5-flash-lite"
+    assert "gemini-2.5-flash" not in explainer.MODELS
+
+
+def test_each_model_gets_its_own_deadline(monkeypatch):
+    clock = FakeClock()
+    models = use_timed_fake(monkeypatch, [timed_out(), ok()], clock)
+    explainer.generate_explanation("report")
+    deadlines = [c["config"].http_options.timeout for c in models.calls]
+    assert deadlines == [explainer.MODEL_TIMEOUT_S[m] * 1000 for m in explainer.MODELS[:2]]
+
+
+def test_timeout_is_not_retried_but_busy_is(monkeypatch):
+    clock = FakeClock()
+    models = use_timed_fake(monkeypatch, [timed_out(), server_error(), ok()], clock)
+    explainer.generate_explanation("report")
+    used = [c["model"] for c in models.calls]
+    # Lite timed out once (no retry); 3.8-flash was busy, retried, then answered.
+    assert used == [explainer.MODELS[0], explainer.MODELS[1], explainer.MODELS[1]]
+
+
+def test_total_budget_caps_the_whole_chain(monkeypatch):
+    clock = FakeClock()
+    start = clock.t
+    models = use_timed_fake(monkeypatch, [timed_out()] * 10, clock)
+    with pytest.raises(genai_errors.ServerError):
+        explainer.generate_explanation("report")
+    assert clock.t - start <= explainer.TOTAL_BUDGET_S
+    # The last call is shortened to fit the remaining budget, never below the minimum.
+    last = models.calls[-1]["config"].http_options.timeout / 1000
+    assert explainer.MIN_CALL_S <= last <= explainer.MODEL_TIMEOUT_S[models.calls[-1]["model"]]
+
+
+def test_worst_case_is_far_below_old_140_seconds(monkeypatch):
+    clock = FakeClock()
+    start = clock.t
+    use_timed_fake(monkeypatch, [timed_out()] * 10, clock)
+    with pytest.raises(genai_errors.ServerError):
+        explainer.generate_explanation("report")
+    assert clock.t - start <= 90

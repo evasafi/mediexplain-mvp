@@ -1,9 +1,12 @@
 import logging
+import threading
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from backend.routers import reports
+from backend.services import glossary
 from backend.services.parser import ocr_available
 
 logging.basicConfig(
@@ -12,10 +15,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger("backend")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Build the glossary index in the background so the first upload doesn't
+    # wait for it. Requests still work (just slower) if this hasn't finished.
+    threading.Thread(target=glossary.warm, name="glossary-warm", daemon=True).start()
+    yield
+
+
 app = FastAPI(
     title="MediExplain MVP Backend",
     description="Stateless, privacy-focused medical report parser and synthesizer",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan,
 )
 
 app.include_router(reports.router, prefix="/reports", tags=["Reports"])

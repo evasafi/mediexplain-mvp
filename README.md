@@ -31,9 +31,11 @@ Upload a lab report (PDF, PNG or JPG) and get a plain-language explanation of ea
      web page then asks the user to compare numbers with the original.
 3. The first 30,000 characters go to Gemini with a guardrailed system prompt
    and a structured output schema (`backend/services/explainer.py`).
-   Models are tried in order: `gemini-3.8-flash`, `gemini-3.5-flash`, then
-   `gemini-3.5-flash-lite` as a fast last resort. Busy or timed-out models are retried
-   (60 s limit per call); rate-limited (429) or missing (404) models are skipped.
+   Models are tried fastest first: `gemini-3.5-flash-lite` (about 2 s on the sample),
+   then `gemini-3.8-flash` and `gemini-3.5-flash`. Each call has its own deadline
+   (20 s for Lite, 40 s for Flash) and the whole chain has a 90 s budget. A busy model
+   (503) gets one quick retry; a timed-out (504), rate-limited (429) or missing (404)
+   model is skipped. Code verification and the prompt rules apply to every model.
 4. **Glossary retrieval (RAG)** (`backend/services/glossary.py`). Each report line
    is reduced to its test-name words and looked up in an in-memory ChromaDB index of
    52 MedlinePlus lab-test definitions (`backend/data/glossary.json`). Up to 8 close
@@ -157,7 +159,8 @@ The tests mock the model and never call Gemini.
 - OCR can misread numbers. Task 2's verification then checks the model against
   the OCR text, not against the original image.
 - Only the first 30,000 characters of a report are sent to the model.
-- Gemini often returns 503 under load. The end-to-end time target has not been measured.
+- Gemini often returns 503 under load. With Lite first, the sample takes a few seconds;
+  if Lite is down, the full Flash models can take 30-60 s (90 s at most).
 
 ## Licences
 

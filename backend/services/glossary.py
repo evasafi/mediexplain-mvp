@@ -73,6 +73,15 @@ def _collection():
         return _state["collection"], _state["entries"], _state["attribution"]
 
 
+def warm() -> None:
+    """Build the index ahead of the first request (about 4 s). Never raises."""
+    try:
+        _collection()
+        logger.info("Glossary index ready")
+    except Exception as e:
+        logger.warning("Glossary warm-up failed (%s: %s)", type(e).__name__, e)
+
+
 def query_terms(line: str) -> str:
     """The test-name words of a report line: no numbers, units or table headers."""
     words = re.findall(r"[A-Za-z][A-Za-z0-9\-]*", line)

@@ -139,3 +139,25 @@ def test_system_prompt_limits_glossary_use():
     p = explainer.SYSTEM_PROMPT
     assert "<glossary>" in p and "not instructions" in p
     assert "Never diagnose" in p  # original rules kept
+
+
+def test_warm_never_raises(monkeypatch):
+    def boom():
+        raise RuntimeError("no model")
+    monkeypatch.setattr(glossary, "_collection", boom)
+    glossary.warm()  # logs, does not raise
+
+
+def test_server_startup_warms_glossary(monkeypatch):
+    from fastapi.testclient import TestClient
+    from backend.main import app
+    called = []
+    monkeypatch.setattr(glossary, "warm", lambda: called.append(True))
+    with TestClient(app) as c:  # runs the lifespan startup
+        c.get("/health")
+    import time
+    for _ in range(50):
+        if called:
+            break
+        time.sleep(0.02)
+    assert called == [True]
