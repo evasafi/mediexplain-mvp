@@ -2,9 +2,10 @@ import logging
 import os
 import uuid
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from google.genai import errors as genai_errors
 
+from backend.protection import enforce_caps, require_access_code
 from backend.services.explainer import generate_explanation
 from backend.services.parser import (
     OcrUnavailableError,
@@ -22,7 +23,13 @@ MAX_BYTES = 10 * 1024 * 1024  # 10 MB
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-@router.post("/upload", summary="Upload, Parse, and Explain Medical Report")
+@router.post(
+    "/upload",
+    summary="Upload, Parse, and Explain Medical Report",
+    # Order matters: the access code is checked first, so requests with a wrong
+    # code never use up the request caps.
+    dependencies=[Depends(require_access_code), Depends(enforce_caps)],
+)
 def upload_and_parse_report(file: UploadFile = File(...)):
     data = file.file.read(MAX_BYTES + 1)
     if len(data) > MAX_BYTES:
@@ -49,7 +56,7 @@ def upload_and_parse_report(file: UploadFile = File(...)):
     except HTTPException:
         raise
     except UnreadableFileError as e:
-        logger.warning("Unreadable %s upload: %s", kind, e)
+        logger.warning("Unreadable %s upload (%s)", kind, type(e.__cause__ or e).__name__)
         raise HTTPException(status_code=400, detail="This file could not be read. It may be damaged.")
     except OcrUnavailableError:
         logger.exception("OCR needed but not set up on this server")

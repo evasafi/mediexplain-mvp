@@ -139,6 +139,43 @@ Two more made-up reports test verification (regenerate with `python make_samples
 - `sample_indian_grouping.pdf`: Platelets 1,32,000 with range 1,50,000 - 4,50,000.
   Expected: low, verified.
 
+## Deployment (public demo)
+
+The demo is for made-up or template reports only. The page shows a banner
+saying so, and the protections below limit who can use it and how much.
+
+### Environment variables
+
+| Variable | Used by | Required | What it does |
+|---|---|---|---|
+| `GEMINI_API_KEY` | backend | Yes | Gemini API key. Keep it in `.env` or the host's secret settings; never commit it. |
+| `ACCESS_CODE` | backend | For a public demo | If set, `POST /reports/upload` needs a matching `X-Access-Code` header (compared in constant time), otherwise 401. If unset, no code is needed (local development). `/health` is always open. |
+| `MAX_REQUESTS_PER_DAY` | backend | No (default 100) | Uploads allowed per UTC day, all users together. Over it: 429. |
+| `MAX_REQUESTS_PER_IP_PER_HOUR` | backend | No (default 10) | Uploads allowed per client IP in a rolling hour. Over it: 429. |
+| `TRUST_FORWARDED_FOR` | backend | No (default off) | `true` makes the per-IP cap use the first `X-Forwarded-For` address. Turn it on only when clients can reach the backend solely through the Streamlit page or a proxy, because the header is easy to fake. Without it, every request through the page counts as the page server's IP. |
+| `TESSDATA_PREFIX` | backend | No | Folder with Tesseract's language data, if Tesseract is not in its default folder or on PATH. |
+| `MEDIEXPLAIN_API_URL` | front end | No (default `http://127.0.0.1:8000`) | Where the Streamlit page sends uploads. |
+
+**OCR needs Tesseract installed on the backend host** (with English language
+data). Without it, text PDFs still work and images or scanned PDFs return 501.
+`GET /health` shows `ocr_available` and `access_code_required`.
+
+The glossary's embedding model (about 80 MB) downloads on the backend's first
+start, so the host needs internet access then.
+
+### How the protections behave
+
+- **Access code:** the Streamlit page asks for it in a password-style field
+  (shown only when the backend requires one), keeps it in the browser session
+  only, and sends it as `X-Access-Code`. A wrong code is rejected before the
+  file is read and does not count against the caps.
+- **Request caps are in memory.** A restart resets them, and each worker
+  process keeps its own counters, so run the backend as **one** worker
+  (`uvicorn backend.main:app`, no `--workers`) for the caps to hold.
+- **Logs** never contain report text, the access code or API keys. Errors are
+  logged as their type and stack frames without the exception message, and the
+  key and code values are masked in every log line.
+
 ## Tests
 
 ```powershell

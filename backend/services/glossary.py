@@ -79,7 +79,7 @@ def warm() -> None:
         _collection()
         logger.info("Glossary index ready")
     except Exception as e:
-        logger.warning("Glossary warm-up failed (%s: %s)", type(e).__name__, e)
+        logger.warning("Glossary warm-up failed (%s)", type(e).__name__)
 
 
 def query_terms(line: str) -> str:
@@ -119,8 +119,9 @@ def retrieve(report_text: str) -> tuple[list[dict], str]:
             return [], ""  # credit only when definitions are actually used
         return [entries[i] for i in chosen], attribution
     except Exception as e:
-        logger.warning("Glossary retrieval unavailable (%s: %s); continuing without it",
-                       type(e).__name__, e)
+        # Type only: the message of a search error can quote report lines.
+        logger.warning("Glossary retrieval unavailable (%s); continuing without it",
+                       type(e).__name__)
         return [], ""
 
 

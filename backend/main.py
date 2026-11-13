@@ -5,14 +5,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from backend.logsafe import protect_other_handlers, setup_logging
+from backend.protection import access_code_required
 from backend.routers import reports
 from backend.services import glossary
 from backend.services.parser import ocr_available
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
-)
+# No report text, access code or API key ever reaches the logs. See logsafe.py.
+setup_logging()
 logger = logging.getLogger("backend")
 
 @asynccontextmanager
@@ -20,6 +20,7 @@ async def lifespan(app: FastAPI):
     # Build the glossary index in the background so the first upload doesn't
     # wait for it. Requests still work (just slower) if this hasn't finished.
     threading.Thread(target=glossary.warm, name="glossary-warm", daemon=True).start()
+    protect_other_handlers()  # uvicorn's own log handlers exist by now
     yield
 
 
@@ -51,4 +52,6 @@ def health_check():
         "status": "healthy",
         "service": "MediExplain Stateless Backend",
         "ocr_available": ocr_available(),
+        # Lets the web page show the code field only when it is needed.
+        "access_code_required": access_code_required(),
     }

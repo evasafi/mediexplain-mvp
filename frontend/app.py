@@ -48,6 +48,11 @@ OCR_NOTE = (
     "This report was read from an image, so some numbers may have been misread. "
     "Compare each result with your original report."
 )
+DEMO_BANNER = "Demo only. Upload made-up or template reports, never a real person's."
+ACCESS_CODE_MESSAGE = (
+    "This demo needs an access code. Please enter the code you were given and try again."
+)
+LIMIT_MESSAGE = "This demo has reached its usage limit for now. Please try again later."
 GENERIC_ERROR = "Something went wrong while explaining this report. Please try again."
 
 STATUS_LABEL = {"low": "LOW", "high": "HIGH", "normal": "Normal", "unknown": "Unknown"}
@@ -63,7 +68,19 @@ def friendly_error(status_code: int) -> str:
     return FRIENDLY_ERRORS.get(status_code, GENERIC_ERROR)
 
 
-def explain_report(file_name: str, data: bytes) -> tuple[dict | None, str | None]:
+def request_headers(access_code: str | None, client_ip: str | None) -> dict:
+    headers = {}
+    if access_code:
+        headers["X-Access-Code"] = access_code
+    if client_ip:
+        # Used for the per-IP cap only if the backend sets TRUST_FORWARDED_FOR.
+        headers["X-Forwarded-For"] = client_ip
+    return headers
+
+
+def explain_report(
+    file_name: str, data: bytes, access_code: str | None = None, client_ip: str | None = None,
+) -> tuple[dict | None, str | None]:
     """POST the report to the backend. Returns (result, None) or (None, user message)."""
     if len(data) > MAX_BYTES:
         return None, FRIENDLY_ERRORS[413]
@@ -72,6 +89,7 @@ def explain_report(file_name: str, data: bytes) -> tuple[dict | None, str | None
             f"{API_URL}/reports/upload",
             # The backend checks the real type by file signature; this is only a hint.
             files={"file": (file_name, data, mime_type(file_name))},
+            headers=request_headers(access_code, client_ip),
             timeout=REQUEST_TIMEOUT_S,
         )
     except requests.exceptions.Timeout:
@@ -81,12 +99,36 @@ def explain_report(file_name: str, data: bytes) -> tuple[dict | None, str | None
             "The MediExplain service is not reachable. "
             "If you are running it yourself, start the backend first."
         )
+    if r.status_code in (401, 429):
+        # The backend's own text says which limit was hit; fall back to ours.
+        try:
+            detail = r.json().get("detail")
+        except ValueError:
+            detail = None
+        fallback = ACCESS_CODE_MESSAGE if r.status_code == 401 else LIMIT_MESSAGE
+        return None, detail if isinstance(detail, str) and detail else fallback
     if r.status_code != 200:
         return None, friendly_error(r.status_code)
     try:
         return r.json(), None
     except ValueError:
         return None, GENERIC_ERROR
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def access_code_needed() -> bool:
+    """Ask the backend whether uploads need a code. If unsure, show the field."""
+    try:
+        return bool(requests.get(f"{API_URL}/health", timeout=5).json().get("access_code_required", True))
+    except Exception:
+        return True
+
+
+def viewer_ip() -> str | None:
+    try:
+        return st.context.ip_address
+    except Exception:
+        return None
 
 
 def mime_type(file_name: str) -> str:
@@ -192,9 +234,15 @@ def main() -> None:
     result = st.session_state.get("result")
     disclaimer = (result or {}).get("disclaimer") or DEFAULT_DISCLAIMER
 
+    st.warning(DEMO_BANNER, icon="⚠️")
     st.title("MediExplain")
     st.write("Upload a lab report and get a plain-language explanation of your results.")
     st.info(disclaimer, icon="ℹ️")
+
+    if access_code_needed():
+        # A widget value lives only in this browser session; it is never saved or logged.
+        st.text_input("Access code", type="password", key="access_code",
+                      help="Ask the demo organiser for the code.")
 
     uploaded = st.file_uploader(
         "Lab report (PDF, PNG or JPG, up to 10 MB)", type=["pdf", "png", "jpg", "jpeg"],
@@ -213,7 +261,10 @@ def main() -> None:
 
     if uploaded is not None and st.button("Explain my report", type="primary"):
         with st.spinner("Reading and explaining your report. This usually takes a few seconds..."):
-            result, error = explain_report(uploaded.name, uploaded.getvalue())
+            result, error = explain_report(
+                uploaded.name, uploaded.getvalue(),
+                access_code=st.session_state.get("access_code"), client_ip=viewer_ip(),
+            )
         st.session_state["result"] = result
         st.session_state["error"] = error
         st.rerun()  # redraw so the top disclaimer uses the backend's text

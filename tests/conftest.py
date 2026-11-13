@@ -4,6 +4,7 @@ import pymupdf
 import pytest
 from google.genai import errors as genai_errors
 
+from backend.protection import caps
 from backend.services import explainer
 
 
@@ -19,6 +20,12 @@ def no_real_model(monkeypatch):
     monkeypatch.setattr(explainer, "time", SimpleNamespace(sleep=lambda s: None))
     # Explainer tests don't depend on the glossary index; test_glossary.py covers it.
     monkeypatch.setattr(explainer, "retrieve", lambda text: ([], ""))
+    # Every test starts with fresh request counters and no demo settings from the
+    # developer's environment; test_protection.py sets them where needed.
+    for name in ("ACCESS_CODE", "MAX_REQUESTS_PER_DAY", "MAX_REQUESTS_PER_IP_PER_HOUR",
+                 "TRUST_FORWARDED_FOR"):
+        monkeypatch.delenv(name, raising=False)
+    caps.reset()
 
 
 def make_pdf(text: str | None) -> bytes:

@@ -64,8 +64,8 @@ def test_unknown_error_gets_generic_message():
 def test_explain_report_posts_to_configured_url(monkeypatch):
     seen = {}
 
-    def fake_post(url, files, timeout):
-        seen.update(url=url, files=files, timeout=timeout)
+    def fake_post(url, files, timeout, headers=None):
+        seen.update(url=url, files=files, timeout=timeout, headers=headers)
         return FakeResponse(200, RESULT)
 
     monkeypatch.setattr(app, "API_URL", "http://backend.test:9000")
@@ -215,3 +215,47 @@ def test_uploader_accepts_images():
     src = Path(APP_FILE).read_text(encoding="utf-8")
     assert 'type=["pdf", "png", "jpg", "jpeg"]' in src
     assert not at.exception
+
+
+# ---- public demo: banner, access code, limits -------------------------------------------
+
+def test_demo_banner_is_first_on_the_page():
+    at = run_app()
+    assert at.warning[0].value == app.DEMO_BANNER
+    assert app.DEMO_BANNER == "Demo only. Upload made-up or template reports, never a real person's."
+
+
+def test_access_code_field_is_password_style_and_session_only(monkeypatch):
+    src = Path(APP_FILE).read_text(encoding="utf-8")
+    assert 'st.text_input("Access code", type="password", key="access_code"' in src
+    at = run_app()
+    at.text_input(key="access_code").set_value("s3cret-demo").run()
+    assert at.session_state["access_code"] == "s3cret-demo"
+
+
+def test_code_and_ip_are_sent_as_headers(monkeypatch):
+    seen = {}
+
+    def fake_post(url, files, timeout, headers=None):
+        seen["headers"] = headers
+        return FakeResponse(200, RESULT)
+
+    monkeypatch.setattr(app.requests, "post", fake_post)
+    app.explain_report("r.pdf", b"%PDF", access_code="s3cret-demo", client_ip="203.0.113.5")
+    assert seen["headers"] == {"X-Access-Code": "s3cret-demo", "X-Forwarded-For": "203.0.113.5"}
+    app.explain_report("r.pdf", b"%PDF")
+    assert seen["headers"] == {}
+
+
+@pytest.mark.parametrize("code,detail,expected", [
+    (401, "Backend 401 text.", "Backend 401 text."),
+    (429, "You have reached the limit of 10 reports per hour.", "You have reached the limit of 10 reports per hour."),
+    (401, None, "ACCESS"),
+    (429, None, "LIMIT"),
+])
+def test_401_and_429_show_friendly_messages(monkeypatch, code, detail, expected):
+    body = {"detail": detail} if detail else {}
+    monkeypatch.setattr(app.requests, "post", lambda *a, **k: FakeResponse(code, body))
+    _, error = app.explain_report("r.pdf", b"%PDF")
+    expected = {"ACCESS": app.ACCESS_CODE_MESSAGE, "LIMIT": app.LIMIT_MESSAGE}.get(expected, expected)
+    assert error == expected
