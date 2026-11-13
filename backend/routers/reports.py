@@ -44,6 +44,15 @@ def upload_and_parse_report(file: UploadFile = File(...)):
             status_code=503,
             detail="The explanation service is busy. Please try again in a minute.",
         )
+    except genai_errors.ClientError as e:
+        if e.code != 429:
+            logger.exception("Model request rejected: %s %s", e.code, e.status)
+            raise HTTPException(status_code=500, detail="Could not process this report.")
+        logger.exception("Model quota or rate limit reached (429)")
+        raise HTTPException(
+            status_code=503,
+            detail="The explanation service is busy. Please try again in a minute.",
+        )
     except Exception as e:
         # Real type + traceback go to the server log; the client gets a generic message.
         logger.exception(

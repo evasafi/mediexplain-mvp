@@ -8,6 +8,8 @@ from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel
 
+from backend.services.verifier import verify_markers
+
 load_dotenv()
 logger = logging.getLogger(__name__)
 
@@ -41,6 +43,8 @@ Rules:
 - Write at an 8th-grade reading level. Short sentences. Explain jargon the first time you use it.
 - Be calm and non-alarmist. Say what a marker measures and what a high or low value can generally mean, using words like "can" and "may".
 - Only use values that appear in the report. If a value, unit, or range is missing, use "unknown". Never invent numbers.
+- Copy each value and reference range exactly as printed, including commas and digit grouping (for example "1,32,000"). Do not convert units or reformat numbers.
+- Base status on the printed reference range. If the lab's own flag disagrees with the range, do not pick one: say in the explanation that the two disagree and the doctor or lab can confirm.
 - Mark status "low", "normal" or "high" only when the report gives a reference range or flag. Otherwise use "unknown".
 - Write 3 to 5 questions the patient could ask their doctor, tied to any out-of-range values. If nothing is out of range, ask general follow-up questions.
 - When you mention why a value can be abnormal, give several general possibilities, or none. Never point toward one specific cause, and never name a specific vitamin, supplement, drug, or test.
@@ -104,6 +108,12 @@ def _call_model(text: str) -> ReportExplanation:
                 )
                 time.sleep(2 ** attempt)
             except errors.ClientError as e:
+                if e.code == 429:
+                    # Quota or rate limit for this model: retrying it now won't help,
+                    # but quotas are per model, so try the next one.
+                    last_error = e
+                    logger.warning("%s rate-limited (429), skipping to next model", model)
+                    break
                 if e.code != 404:
                     raise
                 # Model retired or not available to this key: skip it, don't retry.
@@ -121,11 +131,15 @@ def generate_explanation(full_text):
     lowered = full_text.lower()
     emergency = EMERGENCY_NOTICE if any(t in lowered for t in EMERGENCY_TERMS) else None
 
+    # Do not trust the model silently: check values, ranges and lab flags in code.
+    markers, warnings = verify_markers([m.model_dump() for m in result.markers], full_text)
+
     return {
         "disclaimer": DISCLAIMER,
         "emergency_notice": emergency,
         "document_type": result.document_type,
         "summary": result.summary,
-        "markers": [m.model_dump() for m in result.markers],
+        "markers": markers,
         "recommendations": result.questions_for_doctor,
+        "warnings": warnings,
     }

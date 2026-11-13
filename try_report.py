@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 
 import requests
@@ -36,8 +36,15 @@ def main():
         return
 
     print(f'{d["document_type"]} | {len(d["markers"])} markers\n')
+    print(f'{"name":<28}{"value":<11}{"unit":<11}{"range":<22}{"status":<8}{"range":<8}{"lab":<6}verified')
     for m in d["markers"]:
-        print(f'{m["name"]:<42}{m["value"]:<10}{m["unit"]:<14}{m["reference_range"]:<22}{m["status"]}')
+        print(
+            f'{m["name"]:<28}{m["value"]:<11}{m["unit"]:<11}{m["reference_range"]:<22}'
+            f'{m["status"]:<8}{m.get("range_status", "-"):<8}{m.get("lab_flag") or "-":<6}'
+            f'{m.get("verified", "-")}'
+        )
+    for w in d.get("warnings", []):
+        print("WARNING:", w)
     print("\nSUMMARY:", d["summary"], "\n")
     for q in d["recommendations"]:
         print("Q:", q)

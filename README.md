@@ -21,17 +21,30 @@ Upload a lab report PDF and get a plain-language explanation of each marker
 3. The first 30,000 characters go to Gemini with a guardrailed system prompt
    and a structured output schema (`backend/services/explainer.py`).
    Models are tried in order with retries on server errors.
-4. The API returns JSON:
+4. **Verification** (`backend/services/verifier.py`). Code does not trust the
+   model silently. For each marker it finds the marker's row in the report text and checks:
+   - the value really appears in that row (numbers compared by value, so
+     Indian grouping like `1,32,000` and `132000` match);
+   - the model's status matches the printed reference range;
+   - the lab's own flag (H / L / HIGH / LOW / arrows) agrees with the printed range.
+     If they disagree (for example 4,200 flagged LOW with range 4,000 - 11,000),
+     both are shown in a warning. Code never quietly picks one.
+
+   Anything that does not line up sets `verified: false` and adds a warning.
+   The model's `status` is never overwritten. `range_status` is what code computed
+   from the printed range.
+5. The API returns JSON:
    `status`, `disclaimer`, `emergency_notice`, `document_type`, `summary`,
-   `markers` (`name`, `value`, `unit`, `reference_range`, `status`, `explanation`),
-   `recommendations`.
+   `markers` (`name`, `value`, `unit`, `reference_range`, `status`, `explanation`,
+   plus added `verified`, `range_status`, `lab_flag`, `verification_notes`),
+   `recommendations`, and added `warnings` (plain-language list).
 
 | Situation | HTTP |
 |---|---|
 | Not a PDF | 400 |
 | Over 10 MB | 413 |
 | No readable text (for example a scanned PDF) | 422 |
-| Model busy after all retries | 503 |
+| Model busy, timed out, or rate-limited (429) on every model | 503 |
 | Anything else | 500 (generic message; real type and traceback in the server log) |
 
 ## Setup (Windows PowerShell)
@@ -62,6 +75,13 @@ python try_report.py sample_cbc.pdf
 
 `sample_cbc.pdf` is a made-up report. Expected: Hemoglobin 10.2 g/dL low,
 WBC 7.1 normal, Platelets 450 high, MCV 78 fL low.
+
+Two more made-up reports test verification (regenerate with `python make_samples.py`):
+
+- `sample_conflict_flag.pdf`: WBC 4,200 flagged L with range 4,000 - 11,000.
+  Expected: WBC unverified, with a warning that the flag and range disagree.
+- `sample_indian_grouping.pdf`: Platelets 1,32,000 with range 1,50,000 - 4,50,000.
+  Expected: low, verified.
 
 ## Tests
 

@@ -47,14 +47,22 @@ def ok(parsed=PARSED):
 def test_response_shape_and_code_added_disclaimer(monkeypatch):
     use_fake(monkeypatch, [ok()])
     out = explainer.generate_explanation("Hemoglobin 10.2 g/dL 13.0-17.0")
+    # Original fields teammates build against, plus the added `warnings`.
     assert set(out) == {"disclaimer", "emergency_notice", "document_type",
-                        "summary", "markers", "recommendations"}
+                        "summary", "markers", "recommendations", "warnings"}
     assert out["disclaimer"] == explainer.DISCLAIMER
     assert out["emergency_notice"] is None
-    assert out["markers"][0] == {
+    original = {
         "name": "Hemoglobin", "value": "10.2", "unit": "g/dL",
         "reference_range": "13.0-17.0", "status": "low", "explanation": "e",
     }
+    m = out["markers"][0]
+    assert {k: m[k] for k in original} == original
+    assert set(m) - set(original) == {"verified", "range_status", "lab_flag",
+                                      "verification_notes"}
+    # Report says 13.0-17.0, so 10.2 is low and the model's "low" verifies.
+    assert m["verified"] is True and m["range_status"] == "low"
+    assert out["warnings"] == []
     assert out["recommendations"] == PARSED.questions_for_doctor
 
 
@@ -140,3 +148,23 @@ def test_client_has_timeout(monkeypatch):
     monkeypatch.setattr(explainer, "_client", None)
     client = explainer._get_client()
     assert client._api_client._http_options.timeout == explainer.TIMEOUT_MS
+
+
+def rate_limited():
+    return genai_errors.ClientError(
+        429, {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED"}}
+    )
+
+
+def test_429_skips_to_next_model_without_retrying(monkeypatch):
+    models = use_fake(monkeypatch, [rate_limited(), ok()])
+    out = explainer.generate_explanation("report")
+    assert out["document_type"] == "Complete Blood Count"
+    assert [c["model"] for c in models.calls] == explainer.MODELS[:2]
+
+
+def test_all_rate_limited_raises_429(monkeypatch):
+    use_fake(monkeypatch, [rate_limited(), rate_limited(), not_found()])
+    with pytest.raises(genai_errors.ClientError) as exc:
+        explainer.generate_explanation("report")
+    assert exc.value.code == 429

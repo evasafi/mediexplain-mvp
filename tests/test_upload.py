@@ -130,3 +130,17 @@ def test_error_outside_route_try_is_logged_by_global_handler(
     assert r.status_code == 500
     assert "disk full" not in r.text
     assert any("OSError" in rec.getMessage() and rec.exc_info for rec in caplog.records)
+
+
+def test_rate_limit_returns_503_not_500(client, upload_dir, monkeypatch):
+    from google.genai import errors as genai_errors
+
+    def boom(text):
+        raise genai_errors.ClientError(
+            429, {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED"}}
+        )
+
+    monkeypatch.setattr(reports, "generate_explanation", boom)
+    r = post(client, make_pdf("Hemoglobin 10.2 g/dL"))
+    assert r.status_code == 503
+    assert list(upload_dir.iterdir()) == []
